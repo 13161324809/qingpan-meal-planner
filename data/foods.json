@@ -255,6 +255,42 @@
       "unitGrams": null,
       "price": null,
       "notes": "USDA SR28 NDB16108每100g干成熟黄豆参考；用于按干豆投料核算，不能套用熟豆或兑水豆浆重量。碳水by difference含纤维。应充分煮熟。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg16.pdf"
+    },
+    {
+      "id": "photo-20261111-junlebao-fermented-milk",
+      "name": "风味发酵乳",
+      "brand": "君乐宝",
+      "category": "蛋奶",
+      "kcal": 89.62715105162523,
+      "protein": 2.9,
+      "fat": 3.3,
+      "carbs": 12,
+      "sodium": 60,
+      "weightMode": "产品实际克重",
+      "flavor": "",
+      "edibleRatio": 1,
+      "nutritionBasis": "edible",
+      "unitGrams": null,
+      "price": null,
+      "notes": "按用户2026-11-11上传包装每100g录入：375kJ，蛋白质2.9g，脂肪3.3g（饱和脂肪2.3g），碳水12.0g（糖10.5g），钠60mg。能量由375kJ/4.184换算；属于含糖风味发酵乳。"
+    },
+    {
+      "id": "photo-20261111-cp-shuanrou",
+      "name": "涮肉片",
+      "brand": "正大食品 / CP",
+      "category": "肉类",
+      "kcal": 70,
+      "protein": 14.2,
+      "fat": 0.6,
+      "carbs": 1.6,
+      "sodium": 580,
+      "weightMode": "包装产品净重",
+      "flavor": "截图款（具体口味待确认）",
+      "edibleRatio": 1,
+      "nutritionBasis": "edible",
+      "unitGrams": null,
+      "price": null,
+      "notes": "按用户2026-11-11提供的薄荷健康截图每100g可食部录入：70kcal（293kJ），蛋白质14.2g、脂肪0.6g、碳水1.6g、钠580mg。截图标题为正大食品/CP涮肉片，口味被截断；与其他藤椒鸡肉片可能为不同产品，避免合并。"
     }
   ]
 }
