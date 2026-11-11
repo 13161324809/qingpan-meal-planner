@@ -38,7 +38,7 @@
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图2录入。产品名称及口味被截断，未猜测完整口味；钠显示“--”，保留未知，需补包装钠数据后才可参与自动配餐。"
+      "notes": "按用户截图2录入。产品名称及口味被截断，未猜测完整口味；钠显示“--”，保留未知，默认可按热量和三大营养素配餐；仅严格限钠时需补包装钠数据。"
     },
     {
       "id": "photo-20261111-nuts",
@@ -291,6 +291,42 @@
       "unitGrams": null,
       "price": null,
       "notes": "按用户2026-11-11提供的薄荷健康截图每100g可食部录入：70kcal（293kJ），蛋白质14.2g、脂肪0.6g、碳水1.6g、钠580mg。截图标题为正大食品/CP涮肉片，口味被截断；与其他藤椒鸡肉片可能为不同产品，避免合并。"
+    },
+    {
+      "brand": "",
+      "flavor": "",
+      "edibleRatio": 1,
+      "nutritionBasis": "edible",
+      "unitGrams": null,
+      "price": null,
+      "weightMode": "包装产品净重（烹调前）",
+      "id": "photo-20261111-chicken-pinduoduo",
+      "name": "鸡胸肉片（拼多多）",
+      "category": "肉类",
+      "kcal": 73.37476099426387,
+      "protein": 12.1,
+      "fat": 1.6,
+      "carbs": 2.5,
+      "sodium": 551,
+      "notes": "按用户提供的拼多多包装照片，每100g：能量307kJ、蛋白质12.1g、脂肪1.6g、碳水2.5g、钠551mg。能量按307÷4.184换算。名称按用户指定；品牌和具体口味未确认，不推断。不与正大涮肉片合并；按包装标示产品状态称重。"
+    },
+    {
+      "brand": "",
+      "flavor": "",
+      "edibleRatio": 1,
+      "nutritionBasis": "edible",
+      "unitGrams": null,
+      "price": null,
+      "weightMode": "包装产品净重（烹调前）",
+      "id": "photo-20261111-blackfish-douyin",
+      "name": "黑鱼片（抖音）",
+      "category": "鱼类",
+      "kcal": 82.21797323135755,
+      "protein": 8.7,
+      "fat": 2,
+      "carbs": 0.6,
+      "sodium": 647,
+      "notes": "按用户提供的抖音商品营养表，每100g：能量344kJ、蛋白质8.7g、脂肪2.0g、碳水0.6g、钠647mg。能量按344÷4.184换算。配料含黑鱼片、水、复合调味料和淀粉；品牌及冰衣比例未知，不推断。不与原有聚恒创免浆黑鱼片合并。 商品页能量与三大营养素4/9/4折算约55.2kcal不一致，保留344kJ原标示，请以实物包装核对。"
     }
   ]
 }

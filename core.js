@@ -13,6 +13,9 @@
   const number = (x) => typeof x === "number" && Number.isFinite(x);
   const nonneg = (x) => number(x) && x >= 0;
   const kjToKcal = (kj) => kj / 4.184;
+  const sodiumEnabled = (t) => t?.enforceSodium === true;
+  const constraintKeys = (t) =>
+    keys.filter((k) => k !== "sodium" || sodiumEnabled(t));
   function validateFood(f) {
     if (
       !f ||
@@ -103,12 +106,17 @@
   }
   function targetBounds(t) {
     if (!t || typeof t.autoCarbs !== "boolean") throw Error("自动碳水设置无效");
+    if (t.enforceSodium !== undefined && typeof t.enforceSodium !== "boolean")
+      throw Error("严格限钠设置无效");
+    if (t.sodium !== undefined && t.sodium !== null && !nonneg(t.sodium))
+      throw Error("钠上限须为非负数或留空");
+    if (sodiumEnabled(t) && !nonneg(t.sodium))
+      throw Error("开启严格限钠时，请填写有效的钠上限");
     for (const k of [
       "kcal",
       "protein",
       "fat",
       "carbs",
-      "sodium",
       "energyTolerance",
       "fatTolerance",
       "carbTolerance",
@@ -138,10 +146,10 @@
         max: carbs + t.carbTolerance,
         target: carbs,
       },
-      sodium: { max: t.sodium, target: t.sodium },
+      sodium: sodiumEnabled(t) ? { max: t.sodium, target: t.sodium } : {},
     };
   }
-  function validateRows(rows, meals) {
+  function validateRows(rows, meals, t = {}) {
     if (!rows.length) throw Error("请先从食物库添加今天想吃的食物");
     if (rows.length > 60)
       throw Error("每次配餐最多支持60条食物，请合并重复条目");
@@ -151,7 +159,7 @@
         throw Error("食物条目编号重复或无效");
       ids.add(r.id);
       validateFood(r.food);
-      const missing = keys.filter((k) => r.food[k] === null);
+      const missing = constraintKeys(t).filter((k) => r.food[k] === null);
       if (missing.length)
         throw Error(
           `${r.food.name}缺少${missing.map((k) => labels[k]).join("、")}数据，请补全后配餐`,
@@ -178,7 +186,7 @@
     const b = targetBounds(t),
       sum = totals(rows),
       issues = [];
-    for (const k of keys) {
+    for (const k of constraintKeys(t)) {
       if (sum.unknown.includes(k)) {
         issues.push(`${labels[k]}数据不完整`);
         continue;
@@ -195,8 +203,27 @@
     }
     return issues;
   }
+  function scaleTargetCalories(target, kcal) {
+    targetBounds(target);
+    if (!number(kcal) || kcal <= 0 || kcal > 100000)
+      throw Error("目标热量须在0–100000 kcal之间，且大于0");
+    const result = clone(target),
+      ratio = kcal / target.kcal;
+    result.kcal = kcal;
+    for (const k of [
+      "protein",
+      "fat",
+      "carbs",
+      "fatTolerance",
+      "carbTolerance",
+    ])
+      result[k] *= ratio;
+    targetBounds(result);
+    return result;
+  }
   function buildModel(rows, t, variant, relaxed = false) {
     const b = targetBounds(t);
+    if (variant === "B" && !sodiumEnabled(t)) variant = "A";
     const model = {
       optimize: "cost",
       opType: "min",
@@ -215,14 +242,15 @@
       const scale = r.fixed ? 1 : r.step;
       const v = {
         cost:
-          variant === "B"
+          0.000001 +
+          (variant === "B"
             ? ((r.food.sodium * factor(r.food) * scale) /
                 100 /
                 Math.max(t.sodium, 1)) *
               8
-            : 0,
+            : 0),
       };
-      for (const k of keys) {
+      for (const k of constraintKeys(t)) {
         v[k] = (r.food[k] * factor(r.food) * scale) / 100;
         v["aim_" + k] = v[k];
       }
@@ -267,7 +295,7 @@
         model.variables["spreadHigh" + i] = { [c]: -1, cost: 6 };
       }
     }
-    for (const k of keys) {
+    for (const k of constraintKeys(t)) {
       model.constraints[k] = {};
       if (b[k].min !== undefined) model.constraints[k].min = b[k].min;
       if (b[k].max !== undefined) model.constraints[k].max = b[k].max;
@@ -299,7 +327,7 @@
     return model;
   }
   function solve(rows, t, meals, variant, solver) {
-    validateRows(rows, meals);
+    validateRows(rows, meals, t);
     targetBounds(t);
     const start = Date.now();
     let relaxed = false;
@@ -342,7 +370,7 @@
     const diagnostics = [];
     if (issues.length) {
       const b = targetBounds(t);
-      for (const k of keys) {
+      for (const k of constraintKeys(t)) {
         let lo = 0,
           hi = 0;
         rows.forEach((r) => {
@@ -370,6 +398,13 @@
       totals: totals(output),
       issues,
       diagnostics,
+      warnings: !sodiumEnabled(t)
+        ? [
+            totals(output).unknown.includes("sodium")
+              ? "钠数据不完整，未纳入配餐约束，不能判断钠是否超标。"
+              : "钠仅作记录，未纳入配餐约束。",
+          ]
+        : [],
       valid: !issues.length,
       relaxed,
       elapsed: Date.now() - start,
@@ -384,6 +419,7 @@
     fat: 50,
     carbs: 182.5,
     autoCarbs: true,
+    enforceSodium: false,
     sodium: 2000,
     energyTolerance: 5,
     fatTolerance: 10,
@@ -395,7 +431,7 @@
     builtinFoodsSeen: [],
     profiles: [defaultTarget()],
     activeProfile: "default",
-    meals: ["早餐", "午餐", "晚餐"],
+    meals: ["全天"],
     templates: [],
     days: {},
   });
@@ -496,6 +532,7 @@
     labels,
     clone,
     kjToKcal,
+    sodiumEnabled,
     validateFood,
     mergeFoodPack,
     installBuiltinFoods,
@@ -504,6 +541,7 @@
     targetBounds,
     validateRows,
     violations,
+    scaleTargetCalories,
     buildModel,
     solve,
     defaultTarget,

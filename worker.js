@@ -2,8 +2,12 @@ importScripts("vendor/solver.js", "core.js");
 self.onmessage = ({ data }) => {
   try {
     self.postMessage({
-      results: ["A", "B", "C"].map((v) =>
-        MealCore.solve(data.rows, data.target, data.meals, v, solver),
+      result: MealCore.solve(
+        data.rows,
+        data.target,
+        data.meals,
+        data.variant,
+        solver,
       ),
     });
   } catch (e) {

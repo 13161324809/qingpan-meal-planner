@@ -11,6 +11,8 @@ const allowed = new Set([
   "app.js",
   "core.js",
   "worker.js",
+  "solver-client.js",
+  "solver-worker-source.js",
   "data/foods.json",
   "data/foods.js",
   "vendor/solver.js",

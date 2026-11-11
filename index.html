@@ -102,7 +102,7 @@
               min="0"
               step="any" /></label
           ><label
-            >钠 mg（不是食盐）<input
+            >钠 mg（选填，不是食盐）<input
               name="sodium"
               type="number"
               min="0"
@@ -191,9 +191,10 @@
       accept="application/json,.json"
       hidden
     />
-    <script src="vendor/solver.js"></script>
     <script src="core.js"></script>
     <script src="data/foods.js"></script>
+    <script src="solver-worker-source.js"></script>
+    <script src="solver-client.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

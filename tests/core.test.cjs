@@ -87,6 +87,7 @@ const row = (id, f = food(id), over = {}) => ({
 });
 const target = (over = {}) => ({
   ...C.defaultTarget(),
+  enforceSodium: true,
   kcal: 200,
   protein: 20,
   fat: 4,
@@ -100,8 +101,80 @@ const target = (over = {}) => ({
 });
 const solve = (rs, t = target(), v = "A") =>
   C.solve(rs, t, ["午餐", "晚餐"], v, solver);
+
+test("默认和旧目标方案都不强制钠，缺钠仍能按热量碳蛋脂求解", () => {
+  assert.equal(C.defaultTarget().enforceSodium, false);
+  for (const mode of [false, undefined]) {
+    const t = target({ enforceSodium: mode });
+    for (const v of ["A", "B", "C"]) {
+      const r = solve([row("a", food("a", { sodium: null }))], t, v);
+      assert.equal(r.valid, true);
+      assert.equal(r.rows[0].grams, 200);
+      assert.equal(r.rows[0].food.sodium, null);
+      assert.ok(r.totals.unknown.includes("sodium"));
+      assert.ok(r.warnings.some((x) => x.includes("钠数据不完整")));
+      assert.deepEqual(r.issues, []);
+    }
+  }
+});
+test("关闭限钠时模型完全不使用钠，方案B明确退回方案A", () => {
+  const rows = [row("a", food("a", { sodium: null }))],
+    t = target({ enforceSodium: false });
+  const a = C.buildModel(rows, t, "A"),
+    b = C.buildModel(rows, t, "B");
+  assert.deepEqual(a, b);
+  assert.equal("sodium" in a.constraints, false);
+  assert.equal("sodium" in a.variables.x0, false);
+  assert.equal(solve([row("a", food("a", { sodium: 10000 }))], t).valid, true);
+  const strict = solve(
+    [row("a", food("a", { sodium: 10000 }), { fixed: true, grams: 200 })],
+    target(),
+  );
+  assert.equal(strict.valid, false);
+  assert.ok(strict.issues.some((x) => x.includes("钠超出")));
+});
+test("钠不完整时仅统计已知部分，未知值不变成真实的零", () => {
+  const rows = [
+    row("a", food("a", { sodium: null }), { fixed: true, grams: 100 }),
+    row("b", food("b"), { fixed: true, grams: 100 }),
+  ];
+  const r = solve(rows, target({ enforceSodium: false }));
+  assert.equal(r.valid, true);
+  assert.equal(r.totals.sodium, 50);
+  assert.ok(r.totals.unknown.includes("sodium"));
+  assert.throws(() => solve(rows, target({ enforceSodium: true })), /缺少钠/);
+});
+test("关闭限钠仍要求热量与三大营养素完整，严格开关会保存在备份中", () => {
+  for (const k of ["kcal", "protein", "fat", "carbs"])
+    assert.throws(
+      () =>
+        solve(
+          [row("a", food("a", { [k]: null }))],
+          target({ enforceSodium: false }),
+        ),
+      /缺少/,
+    );
+  const state = C.initialState();
+  state.profiles[0].enforceSodium = true;
+  const restored = C.validateState(JSON.parse(JSON.stringify(state)));
+  assert.equal(restored.profiles[0].enforceSodium, true);
+  restored.profiles[0].enforceSodium = "yes";
+  assert.throws(() => C.validateState(restored), /严格限钠/);
+});
 test("kJ 精确使用4.184换算", () =>
   assert.ok(Math.abs(C.kjToKcal(418.4) - 100) < 1e-10));
+test("只改热量时按当前宏量目标比例缩放，不修改原目标或钠开关", () => {
+  const original = C.defaultTarget();
+  const scaled = C.scaleTargetCalories(original, 850);
+  assert.equal(scaled.kcal, 850);
+  assert.equal(scaled.protein, 65);
+  assert.equal(scaled.fat, 25);
+  assert.equal(C.targetBounds(scaled).carbs.target, 91.25);
+  assert.equal(original.kcal, 1700);
+  assert.equal(scaled.enforceSodium, false);
+  assert.equal(scaled.sodium, 2000);
+  assert.throws(() => C.scaleTargetCalories(original, 0));
+});
 test("逐项核算每100g的五种营养", () => {
   const s = C.totals([row("1", food("1"), { grams: 125 })]);
   for (const [k, v] of Object.entries({
@@ -238,9 +311,14 @@ test("小型整数问题与穷举最优目标函数交叉校验", () => {
         for (const k of C.keys.filter((k) => k !== "sodium"))
           cost +=
             Math.abs(s[k] - bounds[k].target) * m.variables["under_" + k].cost;
-        if (variant === "B") cost += (s.sodium / t.sodium) * 8;
+        cost +=
+          (a / rs[0].step) * m.variables.x0.cost +
+          (b / rs[1].step) * m.variables.x1.cost;
         if (variant === "C")
-          cost += (Math.abs(a - 50) * 3) / 100 + (Math.abs(b - 50) * 3) / 100;
+          cost +=
+            (Math.abs(a - 50) * 3) / 100 +
+            (Math.abs(b - 50) * 3) / 100 +
+            (6 * Math.abs(a - b)) / 100;
         best = Math.min(best, cost);
       }
     const got = solver.Solve(m);

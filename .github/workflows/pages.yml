@@ -18,7 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test tests/core.test.cjs tests/catalog.test.cjs
+      - run: node build.cjs
+      - run: node --test tests/core.test.cjs tests/catalog.test.cjs tests/solver-client.test.cjs
       - run: node --check app.js
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm run test:ui

@@ -7,6 +7,9 @@ let JSDOM;
 try {
   ({ JSDOM } = require(process.env.QINGPAN_JSDOM || "jsdom"));
 } catch {}
+const builtinCount = JSON.parse(
+  fs.readFileSync(require.resolve("../data/foods.json"), "utf8"),
+).foods.length;
 const C = require("../core.js"),
   root = path.resolve(__dirname, "..");
 const options = { skip: !JSDOM };
@@ -25,7 +28,29 @@ function setup(initial, withBuiltin = false) {
   };
   w.confirm = () => true;
   w.prompt = () => null;
-  w.Worker = undefined;
+  w.Worker = class {
+    postMessage(data) {
+      this.timer = w.setTimeout(() => {
+        if (this.stopped) return;
+        try {
+          const result = w.MealCore.solve(
+            data.rows,
+            data.target,
+            data.meals,
+            data.variant,
+            w.solver,
+          );
+          this.onmessage?.({ data: { result } });
+        } catch (e) {
+          this.onmessage?.({ data: { error: e.message } });
+        }
+      }, 0);
+    }
+    terminate() {
+      this.stopped = true;
+      w.clearTimeout(this.timer);
+    }
+  };
   const downloads = [];
   w.Blob = class {
     constructor(parts) {
@@ -46,6 +71,7 @@ function setup(initial, withBuiltin = false) {
   for (const f of [
     "vendor/solver.js",
     "core.js",
+    "solver-client.js",
     ...(withBuiltin ? ["data/foods.js"] : []),
     "app.js",
   ])
@@ -233,7 +259,7 @@ test("DOM：目标与多餐设置可编辑，并且跨刷新保留", options, as
     ]);
     const copy = setup(t.state());
     try {
-      assert.equal(copy.$('select[data-field="meal"]').value, "第一餐");
+      assert.equal(Object.values(copy.state().days)[0].plan[0].meal, "第一餐");
       assert.equal(Object.values(copy.state().days)[0].target.kcal, 300);
     } finally {
       copy.close();
@@ -276,7 +302,7 @@ test("DOM：应用不同餐次的套餐不隐藏已存在的实际记录", optio
     await route(t, "templates");
     click(t, '[data-action="apply-template"]');
     await route(t, "records");
-    assert.equal(t.$('select[data-field="meal"]').value, "旧餐次");
+    assert.equal(Object.values(t.state().days)[0].actual[0].meal, "旧餐次");
     assert.ok(C.validateState(t.state()));
   } finally {
     t.close();
@@ -331,6 +357,93 @@ test(
     }
   },
 );
+test(
+  "DOM：缺钠默认可配餐，严格开关保存后才要求补齐，汇总不冒充已达标钠",
+  options,
+  async () => {
+    const s = fixture();
+    s.foods[0].sodium = null;
+    const t = setup(s);
+    try {
+      click(t, '[data-action="add-food"]');
+      click(t, "#solve");
+      for (let i = 0; i < 100 && !t.$('[data-action="variant"]'); i++)
+        await tick();
+      assert.equal(t.all('[data-action="variant"]').length, 3);
+      assert.equal(t.$('input[data-field="grams"]').value, "200");
+      assert.match(t.$(".stats").textContent, /钠（仅记录）.*数据不完整/);
+      assert.match(
+        t.$("#app").textContent,
+        /热量、蛋白质、脂肪和碳水约束已满足/,
+      );
+      assert.match(t.$("#app").textContent, /钠未启用 · 与A相同/);
+      await route(t, "settings");
+      assert.equal(t.$('[name="enforceSodium"]').checked, false);
+      assert.equal(t.$('[name="sodium"]').disabled, true);
+      click(t, '[name="enforceSodium"]');
+      assert.equal(t.$('[name="sodium"]').disabled, false);
+      submit(t, "#target-form");
+      assert.equal(Object.values(t.state().days)[0].target.enforceSodium, true);
+      await route(t, "today");
+      click(t, "#solve");
+      await tick();
+      assert.match(t.$("#toast").textContent, /缺少钠/);
+      await route(t, "settings");
+      click(t, '[name="enforceSodium"]');
+      submit(t, "#target-form");
+      await route(t, "today");
+      click(t, "#solve");
+      for (let i = 0; i < 100 && !t.$('[data-action="variant"]'); i++)
+        await tick();
+      assert.equal(t.all('[data-action="variant"]').length, 3);
+    } finally {
+      t.close();
+    }
+  },
+);
+test("DOM：选食材填热量即可求解，不显示餐次选择", options, async () => {
+  const t = setup(fixture());
+  try {
+    click(t, '[data-action="add-food"]');
+    assert.equal(t.all('select[data-field="meal"]').length, 0);
+    t.$("#quick-kcal").value = "300";
+    click(t, "#solve");
+    for (let i = 0; i < 100 && !t.$('[data-action="variant"]'); i++)
+      await tick();
+    const d = Object.values(t.state().days)[0];
+    assert.equal(d.target.kcal, 300);
+    assert.equal(d.target.protein, 30);
+    assert.equal(d.target.fat, 6);
+    assert.equal(d.plan[0].grams, 300);
+  } finally {
+    t.close();
+  }
+});
+test("DOM：取消按钮恢复可点击状态并保留原计划", options, async () => {
+  const t = setup(fixture());
+  let terminated = 0;
+  try {
+    t.w.Worker = class {
+      postMessage() {}
+      terminate() {
+        terminated++;
+      }
+    };
+    click(t, '[data-action="add-food"]');
+    const before = t.state();
+    click(t, "#solve");
+    assert.equal(t.$("#solve").disabled, true);
+    click(t, '[data-action="cancel-solve"]');
+    await tick();
+    assert.equal(t.$("#solve").disabled, false);
+    assert.equal(t.$('[data-action="cancel-solve"]'), null);
+    assert.deepEqual(t.state().days, before.days);
+    assert.equal(terminated, 1);
+    assert.match(t.$("#toast").textContent, /已取消/);
+  } finally {
+    t.close();
+  }
+});
 test("DOM：损坏本地数据不被覆盖，恶意备份不替换有效数据", options, async () => {
   const bad = setup("{broken");
   try {
@@ -364,8 +477,8 @@ test(
   async () => {
     const t = setup(undefined, true);
     try {
-      assert.equal(t.state().foods.length, 14);
-      assert.equal(t.state().builtinFoodsSeen.length, 14);
+      assert.equal(t.state().foods.length, builtinCount);
+      assert.equal(t.state().builtinFoodsSeen.length, builtinCount);
       await route(t, "foods");
       click(t, '[data-action="edit-food"]');
       t.$("#food-form").elements.name.value = "我修改过的挂面";
@@ -374,18 +487,18 @@ test(
       const deleteButtons = t.all('[data-action="delete-food"]');
       deleteButtons[1].click();
       const after = t.state();
-      assert.equal(after.foods.length, 13);
+      assert.equal(after.foods.length, builtinCount - 1);
       const refreshed = setup(after, true);
       try {
-        assert.equal(refreshed.state().foods.length, 13);
+        assert.equal(refreshed.state().foods.length, builtinCount - 1);
         assert.equal(refreshed.state().foods[0].name, "我修改过的挂面");
         assert.equal(refreshed.state().foods[0].kcal, 360);
         await route(refreshed, "foods");
         click(refreshed, '[data-action="restore-builtin"]');
-        assert.equal(refreshed.state().foods.length, 14);
+        assert.equal(refreshed.state().foods.length, builtinCount);
         assert.equal(refreshed.state().foods[0].kcal, 360);
         click(refreshed, '[data-action="restore-builtin"]');
-        assert.equal(refreshed.state().foods.length, 14);
+        assert.equal(refreshed.state().foods.length, builtinCount);
       } finally {
         refreshed.close();
       }

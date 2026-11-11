@@ -8,6 +8,20 @@
   --orange: #bf7945;
   --red: #b3473a;
 }
+.row-card.all-day {
+  grid-template-columns: minmax(0, 1fr) 90px 30px;
+}
+.solve-bar {
+  flex-wrap: wrap;
+}
+#quick-target-form {
+  margin-bottom: 18px;
+}
+#quick-kcal {
+  max-width: 260px;
+  font-size: 20px;
+  font-weight: 600;
+}
 .food-notes {
   white-space: normal;
   overflow-wrap: anywhere;

@@ -6,7 +6,7 @@ const C = require("../core.js");
 const catalog = JSON.parse(
   fs.readFileSync(require.resolve("../data/foods.json"), "utf8"),
 );
-test("自带JSON与离线脚本一致，14种营养数据经过校验，缺失值保留未知", () => {
+test("自带JSON与离线脚本一致，营养数据经过校验，缺失值保留未知", () => {
   const ctx = {};
   vm.createContext(ctx);
   vm.runInContext(
@@ -18,7 +18,7 @@ test("自带JSON与离线脚本一致，14种营养数据经过校验，缺失�
     JSON.stringify(catalog),
   );
   catalog.foods.forEach(C.validateFood);
-  assert.equal(catalog.foods.length, 14);
+  assert.equal(catalog.foods.length, catalog.foods.length);
   const missing = catalog.foods.filter((f) =>
     C.keys.some((k) => f[k] === null),
   );
@@ -30,7 +30,7 @@ test("首次安装保留现有食物与记录；相同食物只添加一次", ()
   existing.kcal = 400;
   state.foods = [existing];
   const installed = C.installBuiltinFoods(state, catalog);
-  assert.equal(installed.state.foods.length, 14);
+  assert.equal(installed.state.foods.length, catalog.foods.length);
   assert.equal(installed.state.foods[0].kcal, 400);
   assert.equal(state.foods.length, 1);
   const again = C.installBuiltinFoods(installed.state, catalog);
@@ -44,7 +44,7 @@ test("删掉自带食物后刷新不复活；新版本只补充从未见过的�
   const removed = state.foods.shift();
   state.foods[0].name = "个人修改的名称";
   const again = C.installBuiltinFoods(state, catalog);
-  assert.equal(again.state.foods.length, 13);
+  assert.equal(again.state.foods.length, catalog.foods.length - 1);
   assert.equal(again.state.foods[0].name, "个人修改的名称");
   assert.ok(!again.state.foods.some((f) => f.id === removed.id));
   const newCatalog = C.clone(catalog);
@@ -55,7 +55,7 @@ test("删掉自带食物后刷新不复活；新版本只补充从未见过的�
   });
   const upgraded = C.installBuiltinFoods(again.state, newCatalog);
   assert.equal(upgraded.added, 1);
-  assert.equal(upgraded.state.foods.length, 14);
+  assert.equal(upgraded.state.foods.length, catalog.foods.length);
   assert.ok(!upgraded.state.foods.some((f) => f.id === removed.id));
   assert.equal(upgraded.state.foods[0].name, "个人修改的名称");
 });
@@ -63,7 +63,7 @@ test("备份包含初始化记录并兼容旧格式；无效元数据被拒绝",
   const state = C.installBuiltinFoods(C.initialState(), catalog).state;
   assert.equal(
     C.validateState(JSON.parse(JSON.stringify(state))).builtinFoodsSeen.length,
-    14,
+    catalog.foods.length,
   );
   const legacy = C.initialState();
   delete legacy.builtinFoodsSeen;

@@ -32,6 +32,8 @@
     results = [],
     variant = 0,
     busy = false,
+    solveJob = null,
+    solveProgress = "",
     search = "",
     category = "全部",
     editingTemplate = null,
@@ -126,6 +128,11 @@
     return `<section class="panel stats"><span class="summary-title">全天营养 · ${page === "records" ? "实际摄入" : "计划摄入"}</span><div class="energy-big mono">${s.unknown.includes("kcal") ? "—" : fmt(s.kcal)} <small>kcal</small></div><div class="goal-caption">每日目标 ${fmt(t.kcal)} kcal · ${s.unknown.includes("kcal") ? "数据不完整" : (s.kcal > t.kcal ? "高于目标 " : "距目标 ") + fmt(Math.abs(t.kcal - s.kcal)) + " kcal"}</div><div class="meter"><span style="width:${Math.min(100, (s.kcal / t.kcal) * 100)}%"></span></div><hr>${C.keys
       .slice(1)
       .map((k) => {
+        if (k === "sodium") {
+          const unknown = s.unknown.includes(k),
+            strict = C.sodiumEnabled(t);
+          return `<div class="macro"><span>钠${strict ? "上限" : "（仅记录）"}</span><strong class="mono">${unknown ? "数据不完整" : fmt(s.sodium) + " mg"}${strict ? `<small> / ${fmt(t.sodium)} mg</small>` : ""}</strong></div>${unknown ? `<div class="macro-caption">已知部分 ${fmt(s.sodium)} mg；不代表全天总量。</div>` : ""}<div class="macro-caption">${strict ? "已开启严格限制" : "未纳入配餐约束"}</div>`;
+        }
         const val = k === "sodium" ? t.sodium : b[k].target;
         return `<div class="macro"><span>${C.labels[k]}${k === "sodium" ? "上限" : ""}</span><strong class="mono">${s.unknown.includes(k) ? "未知" : fmt(s[k])}<small> / ${fmt(val)} ${k === "sodium" ? "mg" : "g"}</small></strong></div><div class="meter"><span style="width:${Math.min(100, (s[k] / Math.max(val, 1)) * 100)}%;background:${k === "sodium" && s[k] > val ? "#be7c50" : k === "protein" ? "#71956a" : k === "fat" ? "#d4aa6d" : "#9da88a"}"></span></div>`;
       })
@@ -138,9 +145,18 @@
     const issues = C.violations(rows, t);
     const diagnostics =
       page === "today" ? results[variant]?.diagnostics || [] : [];
-    return issues.length
-      ? `<div class="notice warn"><strong>尚未满足全部营养约束</strong><ul>${issues.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>${diagnostics.length ? `<strong>约束检查</strong><ul>${diagnostics.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>`
-      : `<div class="notice">✓ 按当前录入数据核算，全部营养约束已满足。</div>`;
+    const scope = C.sodiumEnabled(t)
+      ? "当前启用的营养约束已满足"
+      : "热量、蛋白质、脂肪和碳水约束已满足";
+    const sodiumNote = !C.sodiumEnabled(t)
+      ? `<div class="notice">${C.totals(rows).unknown.includes("sodium") ? "钠数据不完整，未参与配餐，无法判断是否超标。" : "钠仅作记录，未参与配餐约束。"}</div>`
+      : "";
+    return (
+      (issues.length
+        ? `<div class="notice warn"><strong>尚未满足全部营养约束</strong><ul>${issues.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>${diagnostics.length ? `<strong>约束检查</strong><ul>${diagnostics.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>`
+        : `<div class="notice">✓ 按当前录入数据核算，${scope}。</div>`) +
+      sodiumNote
+    );
   }
   function filteredFoods() {
     return state.foods.filter(
@@ -180,10 +196,10 @@
   }
   function rowsView(rows, actual = false) {
     const d = day();
-    return d.meals
+    return ["全天"]
       .map((m) => {
-        const rs = rows.filter((r) => r.meal === m);
-        return `<div class="meal-head"><strong>${esc(m)} <small> / ${rs.length} 种食物</small></strong><small>${fmt(C.totals(rs).kcal)} kcal${C.totals(rs).unknown.length ? " · 数据不全" : ""}</small></div>${rs.map((r) => `<div class="row-card"><div><div class="food-name">${esc(r.food.name)}</div><div class="food-meta">${esc(r.food.weightMode)}${r.food.edibleRatio !== 1 ? " · 可食率 " + fmt(r.food.edibleRatio * 100) + "%" : ""}</div>${r.food.unitGrams ? `<div class="row-unit">≈ ${fmt(r.grams / r.food.unitGrams)} 个／份 <button class="text-button" data-action="unit" data-id="${esc(r.id)}" data-actual="${actual}">按个输入</button></div>` : ""}</div><select aria-label="${esc(r.food.name)}餐次" data-row="${esc(r.id)}" data-field="meal" data-actual="${actual}">${opts(d.meals, r.meal)}</select><div class="row-weight"><input aria-label="${esc(r.food.name)}克数" type="number" min="0" max="10000" step="any" value="${r.grams}" data-row="${esc(r.id)}" data-field="grams" data-actual="${actual}"></div><button class="icon-button" aria-label="移除${esc(r.food.name)}" data-action="remove-row" data-id="${esc(r.id)}" data-actual="${actual}">×</button>${actual ? "" : `<div class="constraints"><label>范围 <input aria-label="最小克数" type="number" min="0" max="10000" value="${r.min}" data-row="${esc(r.id)}" data-field="min">—<input aria-label="最大克数" type="number" min="0" max="10000" value="${r.max}" data-row="${esc(r.id)}" data-field="max"> g</label><label>步长 <select data-row="${esc(r.id)}" data-field="step" aria-label="取整单位">${[1, 5, 10].map((x) => `<option ${x === r.step ? "selected" : ""} value="${x}">${x}g</option>`).join("")}</select></label><label class="fixed"><input type="checkbox" ${r.fixed ? "checked" : ""} data-row="${esc(r.id)}" data-field="fixed"> 固定重量</label></div>`}</div>`).join("")}${rs.length ? `<div class="nutrition-line">${nutritionLine(rs)}</div>` : '<p class="section-note">这一餐还未添加食物</p>'}`;
+        const rs = rows;
+        return `<div class="meal-head"><strong>${esc(m)} <small> / ${rs.length} 种食物</small></strong><small>${fmt(C.totals(rs).kcal)} kcal${C.totals(rs).unknown.length ? " · 数据不全" : ""}</small></div>${rs.map((r) => `<div class="row-card all-day"><div><div class="food-name">${esc(r.food.name)}</div><div class="food-meta">${esc(r.food.weightMode)}${r.food.edibleRatio !== 1 ? " · 可食率 " + fmt(r.food.edibleRatio * 100) + "%" : ""}</div>${r.food.unitGrams ? `<div class="row-unit">≈ ${fmt(r.grams / r.food.unitGrams)} 个／份 <button class="text-button" data-action="unit" data-id="${esc(r.id)}" data-actual="${actual}">按个输入</button></div>` : ""}</div><div class="row-weight"><input aria-label="${esc(r.food.name)}克数" type="number" min="0" max="10000" step="any" value="${r.grams}" data-row="${esc(r.id)}" data-field="grams" data-actual="${actual}"></div><button class="icon-button" aria-label="移除${esc(r.food.name)}" data-action="remove-row" data-id="${esc(r.id)}" data-actual="${actual}">×</button>${actual ? "" : `<div class="constraints"><label>范围 <input aria-label="最小克数" type="number" min="0" max="10000" value="${r.min}" data-row="${esc(r.id)}" data-field="min">—<input aria-label="最大克数" type="number" min="0" max="10000" value="${r.max}" data-row="${esc(r.id)}" data-field="max"> g</label><label>步长 <select data-row="${esc(r.id)}" data-field="step" aria-label="取整单位">${[1, 5, 10].map((x) => `<option ${x === r.step ? "selected" : ""} value="${x}">${x}g</option>`).join("")}</select></label><label class="fixed"><input type="checkbox" ${r.fixed ? "checked" : ""} data-row="${esc(r.id)}" data-field="fixed"> 固定重量</label></div>`}</div>`).join("")}${rs.length ? `<div class="nutrition-line">${nutritionLine(rs)}</div>` : '<p class="section-note">这一餐还未添加食物</p>'}`;
       })
       .join("");
   }
@@ -195,13 +211,13 @@
         "选好喜欢的食物，让每一克都有安排。",
         `<input class="date-input" aria-label="计划日期" type="date" id="date" value="${date}">`,
       ) +
-      `<div class="layout"><div>${!state.foods.length ? '<div class="notice onboard"><span>↗</span><div><strong>从你的第一张营养标签开始</strong><small>录入食物 → 设置目标 → 选择食物 → 自动计算克数</small></div></div>' : ""}<section class="panel"><div class="panel-title"><h2><span class="step-dot">1</span>选择今天的食物</h2><small>${state.foods.length} 种已录入</small></div>${filters()}<div class="food-picker" id="picker">${picker()}</div></section><section class="panel"><div class="panel-title"><h2><span class="step-dot">2</span>安排餐次与份量</h2><button class="text-button" data-action="go-settings">${d.meals.length} 餐 · 自定义 ↗</button></div><p class="section-note">每条食物可单独分餐、限制范围或锁定重量。克数按所录称重口径计算。</p>${d.plan.length ? rowsView(d.plan) : empty("把想吃的食物放进来", "点击上方「选用」添加；同一种食物可以添加到不同餐次。")}<div class="solve-bar"><small>整数约束优化 · 完全在本机计算<br>不使用 AI 猜测营养数据</small><button class="primary" id="solve" data-action="solve" ${busy ? "disabled" : ""}>${busy ? "正在求解…" : "✧ 自动配餐"}</button></div></section>${results.length ? `<section class="panel"><div class="panel-title"><h2><span class="step-dot">3</span>比较配餐方案</h2><small>可手动微调</small></div><div class="result-tabs">${results.map((r, i) => `<button class="${variant === i ? "active" : ""}" data-action="variant" data-index="${i}">方案 ${r.variant}<small>${["热量与蛋白质优先", "控制钠含量优先", "份量均衡优先"][i]}</small></button>`).join("")}</div><div class="notice ${results[variant].valid ? "" : "warn"}">${results[variant].valid ? "✓ 已找到符合约束的配餐。" : "未找到满足全部条件的方案；下方为明确标注差额的参考结果。"}<br><small>三种目标可能得到相同克数。限时求解，不保证已证明全局最优。</small></div>${!results[variant].rows.length ? `<div class="notice error">${results[variant].issues.map(esc).join("<br>")}</div>` : ""}</section>` : ""}${d.plan.length ? issuesBox(d.plan, d.target) + `<div class="actions"><button data-action="save-template">▧ 保存为套餐</button>${editingTemplate ? '<button class="primary" data-action="update-template">保存套餐修改</button>' : ""}<button data-action="copy-actual">记为实际饮食</button><button class="text-button" data-action="clear-plan">清空计划</button></div>` : ""}</div><aside class="sticky">${summary(d.plan, d.target)}<section class="panel right-note"><strong>简单一点，吃得明白。</strong>① 首次使用请核对个人目标。<br>② 烹饪油、调味料也需要录入。<br>③ 已选食物使用营养数据快照，修改食物库后请移除再选用。<br>④ 建议定期导出 JSON 备份。</section></aside></div>`
+      `<div class="layout"><div>${!state.foods.length ? '<div class="notice onboard"><span>↗</span><div><strong>从你的第一张营养标签开始</strong><small>录入食物 → 设置目标 → 选择食物 → 自动计算克数</small></div></div>' : ""}<section class="panel"><div class="panel-title"><h2><span class="step-dot">1</span>选择今天的食物</h2><small>${state.foods.length} 种已录入</small></div>${filters()}<div class="food-picker" id="picker">${picker()}</div></section><section class="panel"><div class="panel-title"><h2><span class="step-dot">2</span>填写目标热量</h2></div><form id="quick-target-form"><label>全天目标热量（kcal）<input id="quick-kcal" type="number" min="1" max="100000" step="any" required value="${d.target.kcal}"></label><p class="hint">无需安排早中晚。蛋白质、脂肪、碳水按当前目标比例随热量调整；需要时可在设置修改比例。</p></form>${d.plan.length ? rowsView(d.plan) : empty("把想吃的食物放进来", "点击上方「选用」添加想吃的食材，再填写全天目标热量。")}<div class="solve-bar"><small>整数约束优化 · 完全在本机计算<br>不使用 AI 猜测营养数据</small><button class="primary" id="solve" data-action="solve" ${busy ? "disabled" : ""}>${busy ? solveProgress || "正在启动后台计算…" : "✧ 自动配餐"}</button>${busy ? '<button type="button" data-action="cancel-solve">取消计算</button>' : ""}</div></section>${results.length ? `<section class="panel"><div class="panel-title"><h2><span class="step-dot">3</span>比较配餐方案</h2><small>可手动微调</small></div><div class="result-tabs">${results.map((r, i) => `<button class="${variant === i ? "active" : ""}" data-action="variant" data-index="${i}">方案 ${r.variant}<small>${["热量与蛋白质优先", C.sodiumEnabled(d.target) ? "控制钠含量优先" : "钠未启用 · 与A相同", "份量均衡优先"][i]}</small></button>`).join("")}</div><div class="notice ${results[variant].valid ? "" : "warn"}">${results[variant].valid ? "✓ 已找到满足当前启用约束的配餐。" : "未找到满足全部条件的方案；下方为明确标注差额的参考结果。"}<br><small>三种目标可能得到相同克数。限时求解，不保证已证明全局最优。</small></div>${!results[variant].rows.length ? `<div class="notice error">${results[variant].issues.map(esc).join("<br>")}</div>` : ""}</section>` : ""}${d.plan.length ? issuesBox(d.plan, d.target) + `<div class="actions"><button data-action="save-template">▧ 保存为套餐</button>${editingTemplate ? '<button class="primary" data-action="update-template">保存套餐修改</button>' : ""}<button data-action="copy-actual">记为实际饮食</button><button class="text-button" data-action="clear-plan">清空计划</button></div>` : ""}</div><aside class="sticky">${summary(d.plan, d.target)}<section class="panel right-note"><strong>简单一点，吃得明白。</strong>① 首次使用请核对个人目标。<br>② 烹饪油、调味料也需要录入。<br>③ 已选食物使用营养数据快照，修改食物库后请移除再选用。<br>④ 建议定期导出 JSON 备份。</section></aside></div>`
     );
   }
   function foodTable() {
     const fs = filteredFoods();
     return fs.length
-      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div><div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}<br>可食 ${fmt(f.edibleRatio * 100)}% · 标示按${f.nutritionBasis === "edible" ? "可食部分" : "称重口径"}</div>${f.notes ? `<div class="food-notes">${esc(f.notes)}</div>` : ""}</td>${C.keys.map((k) => `<td>${f[k] === null ? '<span class="badge warn">待补全</span>' : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
+      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div><div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}<br>可食 ${fmt(f.edibleRatio * 100)}% · 标示按${f.nutritionBasis === "edible" ? "可食部分" : "称重口径"}</div>${f.notes ? `<div class="food-notes">${esc(f.notes)}</div>` : ""}</td>${C.keys.map((k) => `<td>${f[k] === null ? (k === "sodium" ? '<span class="badge">未提供（选填）</span>' : '<span class="badge warn">待补全</span>') : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
       : empty(
           "建立自己的食物库",
           "营养数据由你录入，可长期重复使用。",
@@ -280,7 +296,7 @@
         "照顾自己，从合适的目标开始。",
         "目标、餐次和数据都由你掌握。设置仅由你确认保存。",
       ) +
-      `<div class="settings-grid"><section class="panel"><h2>营养目标方案</h2><div class="profile-toolbar"><select id="profile" aria-label="目标方案">${state.profiles.map((p) => `<option value="${esc(p.id)}" ${p.id === state.activeProfile ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select><button data-action="new-profile">＋ 新方案</button><button class="text-button" data-action="delete-profile">删除</button></div><form id="target-form"><div class="form-grid"><label>方案名称<input name="name" required maxlength="80" value="${esc(t.name)}"></label><label>每日热量 kcal<input type="number" name="kcal" required min="1" step="any" value="${t.kcal}"></label><label>蛋白质目标 g（下限）<input type="number" name="protein" min="0" step="any" required value="${t.protein}"></label><label>脂肪目标 g<input type="number" name="fat" min="0" step="any" required value="${t.fat}"></label><label class="checkbox-label"><input type="checkbox" name="autoCarbs" ${t.autoCarbs ? "checked" : ""}>按 4/9/4 系数自动计算剩余碳水目标</label><label>碳水目标 g<input type="number" name="carbs" min="0" step="any" required value="${t.autoCarbs ? C.targetBounds(t).carbs.target : t.carbs}" ${t.autoCarbs ? "readonly" : ""}></label><label>每日钠上限 mg<input type="number" name="sodium" min="0" step="any" required value="${t.sodium}"></label><div class="form-section">允许范围 <small>自动配餐必须满足这些范围；无解时显示差额参考结果。</small></div><label>热量允许偏差 ± %<input type="number" name="energyTolerance" min="0" max="100" step="any" required value="${t.energyTolerance}"></label><label>脂肪允许偏差 ± g<input type="number" name="fatTolerance" min="0" step="any" required value="${t.fatTolerance}"></label><label>碳水允许偏差 ± g<input type="number" name="carbTolerance" min="0" step="any" required value="${t.carbTolerance}"></label></div><div class="settings-actions"><button type="submit" class="primary">保存并应用到 ${esc(date)}</button></div><p class="hint" style="margin-top:12px">1700kcal 等初始数值只是可修改的起始设置，并非个人营养建议。标签热量直接用于求解，不强制等于三大营养素的4/9/4折算热量。</p></form></section><div><section class="panel"><h2>自定义餐次</h2><form id="meals-form"><label>餐次名称（每行一餐，最多8餐）<textarea name="meals" rows="4" required>${esc(day().meals.join("\n"))}</textarea></label><p class="hint">保存后应用于 ${esc(date)} 及今后新建日期。现有条目按原餐次顺序对应；减少的餐次合并至最后一餐。</p><button class="primary" type="submit">保存餐次</button></form></section><section class="panel"><h2>备份与恢复</h2><p class="section-note">食物、目标、套餐与每日记录均保存在当前浏览器。电脑和手机可通过 JSON 手动迁移。</p><div class="actions"><button class="primary" data-action="export">↗ 导出完整 JSON</button><button data-action="import">导入备份</button>${rawBackup && storageError ? '<button data-action="raw-export">导出原始损坏数据</button>' : ""}</div><p class="hint" style="margin-top:15px">导入前会校验结构。导入会替换当前数据，请先导出备份。清理浏览器数据会清除本地记录。</p></section><section class="panel right-note"><strong>关于轻盘</strong>无后端 · 无付费 AI · 无第三方统计<br>优化算法：混合整数线性规划<br>求解器：jsLPSolver 1.0.3 / Unlicense<br>v1.0 · 体重趋势与云同步留待后续版本。</section></div></div>`
+      `<div class="settings-grid"><section class="panel"><h2>营养目标方案</h2><div class="profile-toolbar"><select id="profile" aria-label="目标方案">${state.profiles.map((p) => `<option value="${esc(p.id)}" ${p.id === state.activeProfile ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select><button data-action="new-profile">＋ 新方案</button><button class="text-button" data-action="delete-profile">删除</button></div><form id="target-form"><div class="form-grid"><label>方案名称<input name="name" required maxlength="80" value="${esc(t.name)}"></label><label>每日热量 kcal<input type="number" name="kcal" required min="1" step="any" value="${t.kcal}"></label><label>蛋白质目标 g（下限）<input type="number" name="protein" min="0" step="any" required value="${t.protein}"></label><label>脂肪目标 g<input type="number" name="fat" min="0" step="any" required value="${t.fat}"></label><label class="checkbox-label"><input type="checkbox" name="autoCarbs" ${t.autoCarbs ? "checked" : ""}>按 4/9/4 系数自动计算剩余碳水目标</label><label>碳水目标 g<input type="number" name="carbs" min="0" step="any" required value="${t.autoCarbs ? C.targetBounds(t).carbs.target : t.carbs}" ${t.autoCarbs ? "readonly" : ""}></label><label class="checkbox-label"><input type="checkbox" name="enforceSodium" ${C.sodiumEnabled(t) ? "checked" : ""}>严格限制钠（开启后需补齐所有所选食物的钠数据）</label><label>每日钠上限 mg<input type="number" name="sodium" min="0" step="any" ${C.sodiumEnabled(t) ? "required" : "disabled"} value="${t.sodium ?? 2000}"></label><p class="hint">默认只按热量、蛋白质、脂肪和碳水配餐；钠可以留空，不参与约束。</p><div class="form-section">允许范围 <small>自动配餐必须满足这些范围；无解时显示差额参考结果。</small></div><label>热量允许偏差 ± %<input type="number" name="energyTolerance" min="0" max="100" step="any" required value="${t.energyTolerance}"></label><label>脂肪允许偏差 ± g<input type="number" name="fatTolerance" min="0" step="any" required value="${t.fatTolerance}"></label><label>碳水允许偏差 ± g<input type="number" name="carbTolerance" min="0" step="any" required value="${t.carbTolerance}"></label></div><div class="settings-actions"><button type="submit" class="primary">保存并应用到 ${esc(date)}</button></div><p class="hint" style="margin-top:12px">1700kcal 等初始数值只是可修改的起始设置，并非个人营养建议。标签热量直接用于求解，不强制等于三大营养素的4/9/4折算热量。</p></form></section><div><section class="panel"><details><summary>餐次设置（可选，用于历史记录）</summary><form id="meals-form"><label>餐次名称（每行一餐，最多8餐）<textarea name="meals" rows="4" required>${esc(day().meals.join("\n"))}</textarea></label><p class="hint">保存后应用于 ${esc(date)} 及今后新建日期。现有条目按原餐次顺序对应；减少的餐次合并至最后一餐。</p><button class="primary" type="submit">保存餐次</button></form></details></section><section class="panel"><h2>备份与恢复</h2><p class="section-note">食物、目标、套餐与每日记录均保存在当前浏览器。电脑和手机可通过 JSON 手动迁移。</p><div class="actions"><button class="primary" data-action="export">↗ 导出完整 JSON</button><button data-action="import">导入备份</button>${rawBackup && storageError ? '<button data-action="raw-export">导出原始损坏数据</button>' : ""}</div><p class="hint" style="margin-top:15px">导入前会校验结构。导入会替换当前数据，请先导出备份。清理浏览器数据会清除本地记录。</p></section><section class="panel right-note"><strong>关于轻盘</strong>无后端 · 无付费 AI · 无第三方统计<br>优化算法：混合整数线性规划<br>求解器：jsLPSolver 1.0.3 / Unlicense<br>v1.1 · 体重趋势与云同步留待后续版本。</section></div></div>`
     );
   }
   function render() {
@@ -366,13 +382,27 @@
   async function calculate() {
     if (busy) return;
     try {
-      C.validateRows(day().plan, day().meals);
+      const calorieInput = $("#quick-kcal");
+      if (calorieInput) {
+        if (!calorieInput.value.trim() || !calorieInput.checkValidity()) {
+          calorieInput.reportValidity();
+          return;
+        }
+        const kcal = Number(calorieInput.value);
+        if (kcal !== day().target.kcal) {
+          day().target = C.scaleTargetCalories(day().target, kcal);
+          persist();
+        }
+      }
+      C.validateRows(day().plan, day().meals, day().target);
       C.targetBounds(day().target);
     } catch (e) {
       toast(e.message);
       return;
     }
     busy = true;
+    results = [];
+    variant = 0;
     render();
     const input = {
       rows: C.clone(day().plan),
@@ -381,34 +411,13 @@
     };
     const sourceDate = date;
     try {
-      let out;
-      if (location.protocol !== "file:" && typeof Worker !== "undefined")
-        out = await new Promise((resolve, reject) => {
-          const w = new Worker("worker.js");
-          const timer = setTimeout(() => {
-            w.terminate();
-            reject(Error("计算超过20秒，请减少食物条目或调整步长后重试"));
-          }, 20000);
-          w.onmessage = (e) => {
-            clearTimeout(timer);
-            w.terminate();
-            resolve(e.data);
-          };
-          w.onerror = () => {
-            clearTimeout(timer);
-            w.terminate();
-            reject(Error("计算线程加载失败，请检查静态文件是否齐全"));
-          };
-          w.postMessage(input);
-        });
-      else {
-        await new Promise((r) => setTimeout(r, 30));
-        out = {
-          results: ["A", "B", "C"].map((v) =>
-            C.solve(input.rows, input.target, input.meals, v, solver),
-          ),
-        };
-      }
+      solveJob = MealSolver.createJob(input, {
+        onProgress: ({ variant, completed }) => {
+          solveProgress = `正在计算方案${variant}（${completed}/3）`;
+          render();
+        },
+      });
+      const out = await solveJob.promise;
       if (out.error) throw Error(out.error);
       // Discard stale computations if user changed date or inputs while worker was running.
       if (
@@ -421,22 +430,33 @@
         return;
       }
       results = out.results;
-      variant = 0;
-      if (results[0].rows.length) day().plan = C.clone(results[0].rows);
+      variant = results.findIndex((r) => r.valid && r.rows.length);
+      if (variant < 0)
+        variant = Math.max(
+          0,
+          results.findIndex((r) => r.rows.length),
+        );
+      if (results[variant].rows.length)
+        day().plan = C.clone(results[variant].rows);
       persist();
       toast(
-        results[0].valid
-          ? "已计算并核验全部营养约束"
+        results[variant].valid
+          ? results.some((r) => !r.rows.length)
+            ? "已获得可行配餐，部分方案未完成，可查看提示"
+            : "已计算并核验当前启用的营养约束"
           : "目标存在冲突或未找到可行解，请查看差额提示",
       );
     } catch (e) {
       toast(e.message);
     } finally {
       busy = false;
+      solveJob = null;
+      solveProgress = "";
       render();
     }
   }
   const actions = {
+    "cancel-solve": () => solveJob?.cancel(),
     "restore-builtin": () => {
       if (!builtinFoods) throw Error("自带食物库未加载，请刷新后重试");
       if (storageError && rawBackup) throw Error("请先恢复损坏的本地数据");
@@ -483,7 +503,7 @@
       invalidate();
       persist();
       render();
-      toast("已添加，可调整餐次和重量范围");
+      toast("已添加食材，可直接计算或调整重量范围");
     },
     "remove-row": (el) => {
       const key = el.dataset.actual === "true" ? "actual" : "plan";
@@ -663,6 +683,8 @@
     }
     if (e.target.closest("#target-form")) {
       const f = $("#target-form");
+      f.elements.sodium.disabled = !f.elements.enforceSodium.checked;
+      f.elements.sodium.required = f.elements.enforceSodium.checked;
       f.elements.carbs.readOnly = f.elements.autoCarbs.checked;
       if (f.elements.autoCarbs.checked) {
         const n =
@@ -677,7 +699,13 @@
   document.addEventListener("change", (e) =>
     guarded(() => {
       const el = e.target;
-      if (el.id === "date") {
+      if (el.id === "quick-kcal") {
+        if (el.value.trim() && el.checkValidity()) {
+          day().target = C.scaleTargetCalories(day().target, Number(el.value));
+          invalidate();
+          persist();
+        }
+      } else if (el.id === "date") {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(el.value)) return;
         date = el.value;
         editingTemplate = null;
@@ -771,6 +799,11 @@
     });
   });
   document.addEventListener("submit", (e) => {
+    if (e.target.id === "quick-target-form") {
+      e.preventDefault();
+      calculate();
+      return;
+    }
     if (e.target.id === "target-form") {
       e.preventDefault();
       guarded(() => {
@@ -789,6 +822,10 @@
           t[k] = Number(fd.get(k));
         t.name = String(fd.get("name")).trim();
         t.autoCarbs = fd.has("autoCarbs");
+        t.enforceSodium = fd.has("enforceSodium");
+        t.sodium = t.enforceSodium
+          ? Number(fd.get("sodium"))
+          : (profile().sodium ?? 2000);
         if (!t.name) throw Error("方案名称不能为空");
         C.targetBounds(t);
         Object.assign(profile(), t);
