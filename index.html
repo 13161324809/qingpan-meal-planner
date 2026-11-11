@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#24694c" />
+    <meta name="description" content="本地保存的私人智能减脂配餐系统" />
+    <title>轻盘 · 私人配餐</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="#today"
+        ><span class="brand-icon">◒</span
+        ><span>轻盘<small>把饮食，安排得刚刚好</small></span></a
+      >
+      <div class="nav-label">我的饮食空间</div>
+      <nav id="nav" aria-label="主要导航"></nav>
+      <div class="sidebar-bottom">
+        <span class="privacy-dot"></span> 数据仅保存在此浏览器<small
+          >无需账号 · 无需订阅 · 自己掌握</small
+        >
+      </div>
+    </aside>
+    <div class="shell">
+      <header class="topbar">
+        <span>私人智能配餐系统 <span class="tag">LOCAL FIRST</span></span
+        ><button class="text-button" id="backup-top">↗ 导出备份</button>
+      </header>
+      <main id="app"></main>
+      <footer>轻盘 QINGPAN <span>每一餐，都有据可算。</span></footer>
+    </div>
+    <dialog id="food-dialog">
+      <form id="food-form">
+        <div class="dialog-heading">
+          <div>
+            <span class="eyebrow">FOOD LIBRARY</span>
+            <h2 id="food-dialog-title">新增食物</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            data-close="food-dialog"
+            aria-label="关闭"
+          >
+            ×
+          </button>
+        </div>
+        <input name="id" type="hidden" />
+        <div class="form-grid">
+          <label
+            >食物名称 *<input
+              name="name"
+              required
+              maxlength="80"
+              placeholder="例如：原味鸡肉片" /></label
+          ><label
+            >分类<select name="category">
+              <option>肉类</option>
+              <option>鱼类</option>
+              <option>主食</option>
+              <option>蔬菜</option>
+              <option>蛋奶</option>
+              <option>饮品</option>
+              <option>其他</option>
+            </select></label
+          >
+          <label
+            >品牌<input name="brand" maxlength="80" placeholder="选填" /></label
+          ><label
+            >口味<input name="flavor" maxlength="80" placeholder="选填"
+          /></label>
+          <div class="form-section">
+            营养成分表
+            <small>请录入包装或可靠来源的每100克数值；未知请留空。</small>
+          </div>
+          <label
+            >能量单位<select name="energyUnit">
+              <option value="kcal">千卡 kcal</option>
+              <option value="kj">千焦 kJ（÷4.184 转换）</option>
+            </select></label
+          ><label
+            >每100g能量<input
+              name="energy"
+              type="number"
+              min="0"
+              step="any"
+              placeholder="未知留空"
+          /></label>
+          <label
+            >蛋白质 g<input
+              name="protein"
+              type="number"
+              min="0"
+              step="any" /></label
+          ><label
+            >脂肪 g<input name="fat" type="number" min="0" step="any" /></label
+          ><label
+            >碳水化合物 g<input
+              name="carbs"
+              type="number"
+              min="0"
+              step="any" /></label
+          ><label
+            >钠 mg（不是食盐）<input
+              name="sodium"
+              type="number"
+              min="0"
+              step="any"
+          /></label>
+          <div class="form-section">
+            称重与可食部分 <small>配餐中的克数统一按下方称重口径表示。</small>
+          </div>
+          <label
+            >实际称重口径 *<input
+              name="weightMode"
+              required
+              list="weight-modes"
+              placeholder="例如：冷冻带冰衣重量"
+            /><datalist id="weight-modes">
+              <option>干重</option>
+              <option>熟重</option>
+              <option>生重</option>
+              <option>冷冻带冰衣重量</option>
+              <option>去冰衣净重</option>
+              <option>去壳可食重量</option>
+            </datalist></label
+          ><label
+            >可食比例 %<input
+              name="ediblePercent"
+              type="number"
+              min="0.01"
+              max="100"
+              step="any"
+              required
+              value="100"
+          /></label>
+          <label
+            >营养表100g指的是<select name="nutritionBasis">
+              <option value="edible">可食部分（乘可食比例）</option>
+              <option value="weighed">上述称重口径（不再乘比例）</option>
+            </select></label
+          ><label
+            >每个／每份称重 g<input
+              name="unitGrams"
+              type="number"
+              min="0.01"
+              step="any"
+              placeholder="选填，用于按个换算"
+          /></label>
+          <label
+            >每100g称重单价 元<input
+              name="price"
+              type="number"
+              min="0"
+              step="any"
+              placeholder="选填" /></label
+          ><label
+            >数据来源／备注<input
+              name="notes"
+              maxlength="300"
+              placeholder="品牌营养标签、标签日期等"
+          /></label>
+        </div>
+        <p class="hint">
+          饮品请使用实际克重；没有密度数据时，不默认 1ml =
+          1g。生重与熟重应分别录入。
+        </p>
+        <div class="dialog-actions">
+          <button type="button" data-close="food-dialog">取消</button
+          ><button class="primary" type="submit">保存食物</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="name-dialog">
+      <form id="name-form">
+        <h2 id="name-title">保存套餐</h2>
+        <label
+          >名称<input name="name" required maxlength="80" autocomplete="off"
+        /></label>
+        <div class="dialog-actions">
+          <button type="button" data-close="name-dialog">取消</button
+          ><button type="submit" class="primary">保存</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <input
+      type="file"
+      id="import-file"
+      accept="application/json,.json"
+      hidden
+    />
+    <script src="vendor/solver.js"></script>
+    <script src="core.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
