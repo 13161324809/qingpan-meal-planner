@@ -75,6 +75,19 @@
     }
     return { state: next, added, skipped };
   }
+  function installBuiltinFoods(state, pack) {
+    // Validate the complete catalog before touching any existing state.
+    mergeFoodPack(initialState(), pack);
+    const seen = new Set(state.builtinFoodsSeen || []);
+    const unseen = pack.foods.filter((f) => !seen.has(f.id));
+    const result = mergeFoodPack(state, { ...pack, foods: unseen });
+    result.state.builtinFoodsSeen = [
+      ...new Set([...seen, ...pack.foods.map((f) => f.id)]),
+    ];
+    result.changed =
+      result.added > 0 || result.state.builtinFoodsSeen.length !== seen.size;
+    return result;
+  }
   function totals(rows) {
     const out = Object.fromEntries(keys.map((k) => [k, 0]));
     out.unknown = [];
@@ -379,6 +392,7 @@
   const initialState = () => ({
     version: 1,
     foods: [],
+    builtinFoodsSeen: [],
     profiles: [defaultTarget()],
     activeProfile: "default",
     meals: ["早餐", "午餐", "晚餐"],
@@ -397,6 +411,13 @@
       Array.isArray(s.days)
     )
       throw Error("备份结构或版本不受支持");
+    if (
+      s.builtinFoodsSeen !== undefined &&
+      (!Array.isArray(s.builtinFoodsSeen) ||
+        s.builtinFoodsSeen.some((id) => typeof id !== "string" || !id) ||
+        new Set(s.builtinFoodsSeen).size !== s.builtinFoodsSeen.length)
+    )
+      throw Error("自带食物的初始化记录无效");
     if (
       !Array.isArray(s.meals) ||
       !s.meals.length ||
@@ -477,6 +498,7 @@
     kjToKcal,
     validateFood,
     mergeFoodPack,
+    installBuiltinFoods,
     factor,
     totals,
     targetBounds,

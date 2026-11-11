@@ -23,6 +23,7 @@
   };
   const KEY = "qingpan.v1",
     categories = ["肉类", "鱼类", "主食", "蔬菜", "蛋奶", "饮品", "其他"];
+  const builtinFoods = globalThis.QingpanBuiltinFoods || null;
   let state,
     storageError = "",
     rawBackup = "",
@@ -151,7 +152,14 @@
     );
   }
   function filters() {
-    return `<div class="toolbar"><input id="search" aria-label="搜索食物" placeholder="搜索食物、品牌或口味" value="${esc(search)}"><button data-action="new-food">＋ 新增食物</button>${page === "foods" ? '<button data-action="import">导入食物包</button><button data-action="export-foods">导出食物库</button>' : ""}</div><div class="chip-row">${["全部", ...categories].map((c) => `<button class="chip ${c === category ? "active" : ""}" data-action="filter" data-value="${c}">${c}</button>`).join("")}</div>`;
+    const foodActions =
+      page === "foods"
+        ? '<button data-action="import">导入食物包</button><button data-action="export-foods">导出食物库</button>' +
+          (builtinFoods
+            ? '<button data-action="restore-builtin">恢复自带食物</button>'
+            : "")
+        : "";
+    return `<div class="toolbar"><input id="search" aria-label="搜索食物" placeholder="搜索食物、品牌或口味" value="${esc(search)}"><button data-action="new-food">＋ 新增食物</button>${foodActions}</div><div class="chip-row">${["全部", ...categories].map((c) => `<button class="chip ${c === category ? "active" : ""}" data-action="filter" data-value="${c}">${c}</button>`).join("")}</div>`;
   }
   function picker() {
     return (
@@ -204,7 +212,9 @@
     return (
       heading(
         "你的食物，有据可查。",
-        "保存真实营养标签，下次选用无需重复录入。",
+        builtinFoods
+          ? `系统自带 ${builtinFoods.foods.length} 种食物 · 当前 ${state.foods.length} 种。可新增、修改或删除，个人修改保存在此浏览器。`
+          : "保存真实营养标签，下次选用无需重复录入。",
       ) +
       `<section class="panel">${filters()}<div class="section-note">以下均为每100g营养标示值。实际营养依照称重口径与可食比例换算。</div><div class="table-scroll" id="food-table">${foodTable()}</div></section>`
     );
@@ -427,6 +437,21 @@
     }
   }
   const actions = {
+    "restore-builtin": () => {
+      if (!builtinFoods) throw Error("自带食物库未加载，请刷新后重试");
+      if (storageError && rawBackup) throw Error("请先恢复损坏的本地数据");
+      const merged = C.mergeFoodPack(state, builtinFoods);
+      state = merged.state;
+      state.builtinFoodsSeen = [
+        ...new Set([
+          ...(state.builtinFoodsSeen || []),
+          ...builtinFoods.foods.map((f) => f.id),
+        ]),
+      ];
+      persist();
+      render();
+      toast(`已恢复${merged.added}种自带食物，保留${merged.skipped}种已有食物`);
+    },
     "go-settings": () => (location.hash = "settings"),
     "go-today": () => (location.hash = "today"),
     "new-food": () => openFood(),
@@ -831,6 +856,15 @@
       )
         return;
       state = C.clone(next);
+      // Restoring a full backup preserves its exact food selection, even when
+      // it predates built-in catalogs. Missing defaults remain intentionally absent.
+      if (builtinFoods)
+        state.builtinFoodsSeen = [
+          ...new Set([
+            ...(state.builtinFoodsSeen || []),
+            ...builtinFoods.foods.map((f) => f.id),
+          ]),
+        ];
       storageError = "";
       rawBackup = "";
       editingTemplate = null;
@@ -846,5 +880,14 @@
   });
   $("#backup-top").addEventListener("click", exportData);
   window.addEventListener("hashchange", route);
+  if (builtinFoods && !storageError) {
+    try {
+      const installed = C.installBuiltinFoods(state, builtinFoods);
+      state = installed.state;
+      if (installed.changed) persist();
+    } catch (e) {
+      toast("自带食物库加载失败：" + e.message);
+    }
+  }
   route();
 })();

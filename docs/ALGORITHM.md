@@ -4,6 +4,8 @@
 
 根对象：`{version, foods, profiles, activeProfile, meals, templates, days}`，以JSON保存在 `localStorage['qingpan.v1']`。导入在替换前做结构和数值校验；不使用导入文件中的可执行代码。
 
+现另含可选字段 `builtinFoodsSeen: string[]`，保存已经初始化过的自带食物编号。`data/foods.json` 是公开随应用发布的系统基础库；初始化只添加未见过的编号，随后个人删除和编辑通过本地完整食物表及此元数据保留，不由重新载入基础库覆盖。完整备份同时保留初始化记录，兼容不含此字段的旧备份。
+
 - Food：`id,name,brand,flavor,category,kcal,protein,fat,carbs,sodium,weightMode,edibleRatio,nutritionBasis,unitGrams,price,notes`。营养字段是每100g标示值，`null`代表未知，零与未知严格区分。`price`为每100g实际称重口径的可选单价，当前版本只保存，不作为优化目标。
 - Target：`id,name,kcal,protein,fat,carbs,autoCarbs,sodium,energyTolerance,fatTolerance,carbTolerance`。
 - Row：`id,food,meal,grams,min,max,step,fixed`，其中food为独立快照。

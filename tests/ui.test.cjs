@@ -11,7 +11,7 @@ const C = require("../core.js"),
   root = path.resolve(__dirname, "..");
 const options = { skip: !JSDOM };
 const tick = () => new Promise((r) => setTimeout(r, 10));
-function setup(initial) {
+function setup(initial, withBuiltin = false) {
   const dom = new JSDOM(
       fs.readFileSync(path.join(root, "index.html"), "utf8"),
       { url: "http://localhost/", runScripts: "outside-only" },
@@ -43,7 +43,12 @@ function setup(initial) {
       "qingpan.v1",
       typeof initial === "string" ? initial : JSON.stringify(initial),
     );
-  for (const f of ["vendor/solver.js", "core.js", "app.js"])
+  for (const f of [
+    "vendor/solver.js",
+    "core.js",
+    ...(withBuiltin ? ["data/foods.js"] : []),
+    "app.js",
+  ])
     w.eval(fs.readFileSync(path.join(root, f), "utf8"));
   return {
     w,
@@ -353,3 +358,63 @@ test("DOM：损坏本地数据不被覆盖，恶意备份不替换有效数据",
     t.close();
   }
 });
+test(
+  "DOM：新浏览器自动带入食物，编辑删除刷新保留，恢复自带食物不覆盖编辑",
+  options,
+  async () => {
+    const t = setup(undefined, true);
+    try {
+      assert.equal(t.state().foods.length, 14);
+      assert.equal(t.state().builtinFoodsSeen.length, 14);
+      await route(t, "foods");
+      click(t, '[data-action="edit-food"]');
+      t.$("#food-form").elements.name.value = "我修改过的挂面";
+      t.$("#food-form").elements.energy.value = "360";
+      submit(t, "#food-form");
+      const deleteButtons = t.all('[data-action="delete-food"]');
+      deleteButtons[1].click();
+      const after = t.state();
+      assert.equal(after.foods.length, 13);
+      const refreshed = setup(after, true);
+      try {
+        assert.equal(refreshed.state().foods.length, 13);
+        assert.equal(refreshed.state().foods[0].name, "我修改过的挂面");
+        assert.equal(refreshed.state().foods[0].kcal, 360);
+        await route(refreshed, "foods");
+        click(refreshed, '[data-action="restore-builtin"]');
+        assert.equal(refreshed.state().foods.length, 14);
+        assert.equal(refreshed.state().foods[0].kcal, 360);
+        click(refreshed, '[data-action="restore-builtin"]');
+        assert.equal(refreshed.state().foods.length, 14);
+      } finally {
+        refreshed.close();
+      }
+    } finally {
+      t.close();
+    }
+  },
+);
+test(
+  "DOM：完整恢复保留备份的空食物库，刷新不偷偷加回默认食物",
+  options,
+  async () => {
+    const t = setup(undefined, true);
+    try {
+      const backup = C.initialState();
+      Object.defineProperty(t.$("#import-file"), "files", {
+        value: [{ size: 100, text: async () => JSON.stringify(backup) }],
+      });
+      t.$("#import-file").dispatchEvent(new t.w.Event("change"));
+      await tick();
+      assert.equal(t.state().foods.length, 0);
+      const refreshed = setup(t.state(), true);
+      try {
+        assert.equal(refreshed.state().foods.length, 0);
+      } finally {
+        refreshed.close();
+      }
+    } finally {
+      t.close();
+    }
+  },
+);

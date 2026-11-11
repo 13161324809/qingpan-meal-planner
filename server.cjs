@@ -1,4 +1,5 @@
 // Dependency-free local preview, limited to public application assets.
+require("./build.cjs");
 const http = require("node:http"),
   fs = require("node:fs"),
   path = require("node:path");
@@ -10,6 +11,8 @@ const allowed = new Set([
   "app.js",
   "core.js",
   "worker.js",
+  "data/foods.json",
+  "data/foods.js",
   "vendor/solver.js",
 ]);
 http
@@ -32,6 +35,7 @@ http
       ".html": "text/html; charset=utf-8",
       ".js": "text/javascript; charset=utf-8",
       ".css": "text/css; charset=utf-8",
+      ".json": "application/json; charset=utf-8",
     };
     res.writeHead(200, {
       "Content-Type": mime[path.extname(p)],
