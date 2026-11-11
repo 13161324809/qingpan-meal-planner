@@ -8,6 +8,15 @@
   --orange: #bf7945;
   --red: #b3473a;
 }
+.food-notes {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 360px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
 * {
   box-sizing: border-box;
 }

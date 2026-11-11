@@ -39,6 +39,42 @@
   function factor(f) {
     return f.nutritionBasis === "edible" ? f.edibleRatio : 1;
   }
+  function mergeFoodPack(state, pack) {
+    if (
+      !pack ||
+      pack.type !== "qingpan-foods" ||
+      pack.version !== 1 ||
+      !Array.isArray(pack.foods) ||
+      pack.foods.length > 10000
+    )
+      throw Error("不是有效的轻盘食物包（qingpan-foods v1）");
+    const ids = new Set();
+    for (const f of pack.foods) {
+      validateFood(f);
+      if (ids.has(f.id)) throw Error("食物包包含重复编号");
+      ids.add(f.id);
+    }
+    const next = clone(state);
+    const identity = (f) =>
+      [f.name, f.brand || "", f.flavor || "", f.weightMode]
+        .map((x) => x.trim().toLowerCase())
+        .join("\u0000");
+    const knownIds = new Set(next.foods.map((f) => f.id));
+    const knownNames = new Set(next.foods.map(identity));
+    let added = 0,
+      skipped = 0;
+    for (const f of pack.foods) {
+      if (knownIds.has(f.id) || knownNames.has(identity(f))) {
+        skipped++;
+        continue;
+      }
+      next.foods.push(clone(f));
+      knownIds.add(f.id);
+      knownNames.add(identity(f));
+      added++;
+    }
+    return { state: next, added, skipped };
+  }
   function totals(rows) {
     const out = Object.fromEntries(keys.map((k) => [k, 0]));
     out.unknown = [];
@@ -440,6 +476,7 @@
     clone,
     kjToKcal,
     validateFood,
+    mergeFoodPack,
     factor,
     totals,
     targetBounds,

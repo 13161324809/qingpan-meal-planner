@@ -151,7 +151,7 @@
     );
   }
   function filters() {
-    return `<div class="toolbar"><input id="search" aria-label="搜索食物" placeholder="搜索食物、品牌或口味" value="${esc(search)}"><button data-action="new-food">＋ 新增食物</button></div><div class="chip-row">${["全部", ...categories].map((c) => `<button class="chip ${c === category ? "active" : ""}" data-action="filter" data-value="${c}">${c}</button>`).join("")}</div>`;
+    return `<div class="toolbar"><input id="search" aria-label="搜索食物" placeholder="搜索食物、品牌或口味" value="${esc(search)}"><button data-action="new-food">＋ 新增食物</button>${page === "foods" ? '<button data-action="import">导入食物包</button><button data-action="export-foods">导出食物库</button>' : ""}</div><div class="chip-row">${["全部", ...categories].map((c) => `<button class="chip ${c === category ? "active" : ""}" data-action="filter" data-value="${c}">${c}</button>`).join("")}</div>`;
   }
   function picker() {
     return (
@@ -193,7 +193,7 @@
   function foodTable() {
     const fs = filteredFoods();
     return fs.length
-      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div><div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}<br>可食 ${fmt(f.edibleRatio * 100)}% · 标示按${f.nutritionBasis === "edible" ? "可食部分" : "称重口径"}</div></td>${C.keys.map((k) => `<td>${f[k] === null ? '<span class="badge warn">待补全</span>' : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
+      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div><div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}<br>可食 ${fmt(f.edibleRatio * 100)}% · 标示按${f.nutritionBasis === "edible" ? "可食部分" : "称重口径"}</div>${f.notes ? `<div class="food-notes">${esc(f.notes)}</div>` : ""}</td>${C.keys.map((k) => `<td>${f[k] === null ? '<span class="badge warn">待补全</span>' : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
       : empty(
           "建立自己的食物库",
           "营养数据由你录入，可长期重复使用。",
@@ -604,6 +604,15 @@
         render();
       }
     },
+    "export-foods": () =>
+      download(
+        JSON.stringify(
+          { type: "qingpan-foods", version: 1, foods: state.foods },
+          null,
+          2,
+        ),
+        `轻盘食物库-${localDate()}.json`,
+      ),
     export: exportData,
     import: () => $("#import-file").click(),
     "raw-export": () =>
@@ -797,7 +806,24 @@
     if (!file) return;
     try {
       if (file.size > 10 * 1024 * 1024) throw Error("备份文件不能超过10MB");
-      const next = C.validateState(JSON.parse(await file.text()));
+      const data = JSON.parse(await file.text());
+      if (data.type === "qingpan-foods") {
+        if (storageError && rawBackup)
+          throw Error("当前本地数据损坏，请先恢复完整备份，再合并食物");
+        const merged = C.mergeFoodPack(state, data);
+        if (
+          !confirm(
+            `食物包校验通过：新增${merged.added}种，跳过${merged.skipped}种重复食物。现有食物、目标、套餐和记录保持原样，是否导入？`,
+          )
+        )
+          return;
+        state = merged.state;
+        persist();
+        render();
+        toast(`已导入${merged.added}种食物，跳过${merged.skipped}种重复条目`);
+        return;
+      }
+      const next = C.validateState(data);
       if (
         !confirm(
           `校验通过：${next.foods.length}种食物、${next.templates.length}个套餐。将替换当前全部数据，是否继续？`,

@@ -277,6 +277,55 @@ test("DOM：应用不同餐次的套餐不隐藏已存在的实际记录", optio
     t.close();
   }
 });
+test(
+  "DOM：仅食物合并导入不清空记录，可重复导入并导出食物包",
+  options,
+  async () => {
+    const t = setup(fixture());
+    try {
+      click(t, '[data-action="add-food"]');
+      click(t, '[data-action="copy-actual"]');
+      const before = t.state();
+      await route(t, "foods");
+      const f = {
+        ...before.foods[0],
+        id: "new-food",
+        name: "第二种测试食物",
+        sodium: null,
+        notes: "来源 <script>test</script>",
+      };
+      const pack = {
+        type: "qingpan-foods",
+        version: 1,
+        foods: [before.foods[0], f],
+      };
+      const input = t.$("#import-file");
+      Object.defineProperty(input, "files", {
+        value: [{ size: 100, text: async () => JSON.stringify(pack) }],
+      });
+      input.dispatchEvent(new t.w.Event("change"));
+      await tick();
+      assert.equal(t.state().foods.length, 2);
+      assert.deepEqual(t.state().days, before.days);
+      assert.deepEqual(t.state().profiles, before.profiles);
+      assert.equal(
+        t.$(".food-notes").textContent,
+        "来源 <script>test</script>",
+      );
+      assert.equal(t.all(".food-notes script").length, 0);
+      input.dispatchEvent(new t.w.Event("change"));
+      await tick();
+      assert.equal(t.state().foods.length, 2);
+      click(t, '[data-action="export-foods"]');
+      const exported = JSON.parse(t.downloads.at(-1));
+      assert.equal(exported.type, "qingpan-foods");
+      assert.equal(exported.foods[1].sodium, null);
+      assert.equal("days" in exported, false);
+    } finally {
+      t.close();
+    }
+  },
+);
 test("DOM：损坏本地数据不被覆盖，恶意备份不替换有效数据", options, async () => {
   const bad = setup("{broken");
   try {

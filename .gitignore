@@ -6,3 +6,5 @@ playwright-report/
 *.local.*
 .env*
 backups/
+.codex-remote-attachments/
+personal-data/

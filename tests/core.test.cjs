@@ -3,6 +3,50 @@ const test = require("node:test"),
   fs = require("node:fs"),
   vm = require("node:vm");
 const C = require("../core.js");
+test("合并食物包保留目标、套餐、每日记录，重复导入不覆盖已编辑数据", () => {
+  const state = C.initialState();
+  const first = food("a");
+  state.foods = [first];
+  const pack = {
+    type: "qingpan-foods",
+    version: 1,
+    foods: [food("a", { kcal: 999 }), food("b")],
+  };
+  const got = C.mergeFoodPack(state, pack);
+  assert.equal(got.added, 1);
+  assert.equal(got.skipped, 1);
+  assert.equal(got.state.foods[0].kcal, 100);
+  assert.equal(state.foods.length, 1);
+  assert.deepEqual(got.state.profiles, state.profiles);
+  assert.deepEqual(got.state.days, state.days);
+  assert.deepEqual(got.state.templates, state.templates);
+  assert.equal(C.mergeFoodPack(got.state, pack).added, 0);
+  const renamedId = food("other-id", { name: first.name });
+  assert.equal(
+    C.mergeFoodPack(got.state, { ...pack, foods: [renamedId] }).skipped,
+    1,
+  );
+});
+test("食物包先整体校验再合并，未知营养保留，坏条目不写入", () => {
+  const state = C.initialState();
+  const pack = {
+    type: "qingpan-foods",
+    version: 1,
+    foods: [food("a"), food("b", { sodium: null })],
+  };
+  const got = C.mergeFoodPack(state, pack);
+  assert.equal(got.state.foods[1].sodium, null);
+  assert.throws(() =>
+    C.mergeFoodPack(state, {
+      ...pack,
+      foods: [food("a"), food("b", { kcal: -1 })],
+    }),
+  );
+  assert.throws(() =>
+    C.mergeFoodPack(state, { ...pack, foods: [food("a"), food("a")] }),
+  );
+  assert.equal(state.foods.length, 0);
+});
 const ctx = {};
 vm.createContext(ctx);
 vm.runInContext(
