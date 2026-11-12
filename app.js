@@ -180,6 +180,7 @@
   function picker() {
     return (
       filteredFoods()
+        .filter((f) => !day().plan.some((r) => r.food.id === f.id))
         .map(
           (f) =>
             `<div class="pick-item"><div><div class="food-name">${esc(f.name)} <small>${esc(f.brand)}</small></div><div class="food-meta">${f.kcal === null ? "能量未知" : fmt(f.kcal) + " kcal /100g营养标示"} · ${esc(f.weightMode)}${f.edibleRatio !== 1 ? " · 可食 " + fmt(f.edibleRatio * 100) + "%" : ""}</div></div><button data-action="add-food" data-id="${esc(f.id)}">＋ 选用</button></div>`,
@@ -490,6 +491,11 @@
     "add-food": (el) => {
       if (day().plan.length >= 60) throw Error("每次配餐最多60项");
       const f = state.foods.find((f) => f.id === el.dataset.id);
+      if (!f) throw Error("食物不存在，请刷新后重试");
+      if (day().plan.some((r) => r.food.id === f.id)) {
+        toast("今天已选过这种食物，修改克数即可；移除后可以重新选择");
+        return;
+      }
       day().plan.push({
         id: uid(),
         food: C.clone(f),
