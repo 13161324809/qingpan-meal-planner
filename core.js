@@ -16,6 +16,32 @@
   const sodiumEnabled = (t) => t?.enforceSodium === true;
   const constraintKeys = (t) =>
     keys.filter((k) => k !== "sodium" || sodiumEnabled(t));
+  function compositeFood(id, name, rows) {
+    if (typeof name !== "string" || !name.trim()) throw Error("请填写组合套餐名称");
+    if (!Array.isArray(rows) || !rows.length || rows.length > 60) throw Error("组合套餐需要1至60项原料");
+    for (const r of rows) {
+      validateFood(r.food);
+      if (!number(r.grams) || r.grams <= 0) throw Error("原料克数必须大于0");
+    }
+    const grams = rows.reduce((sum, r) => sum + r.grams, 0);
+    if (grams > 10000) throw Error("一份组合套餐不能超过10000g");
+    const sum = totals(rows);
+    const ingredients = rows.map(r => {
+      const food = clone(r.food);
+      delete food.ingredients;
+      return { food, grams: r.grams };
+    });
+    const food = {
+      id, name: name.trim(), category: "组合套餐", brand: "", flavor: "", barcode: "",
+      weightMode: "按配方实际食用净重", unitGrams: grams, countMode: true,
+      isComposite: true, ingredients, price: null,
+      notes: "营养由配方原料用量相加；默认一份整体固定，修改原料后需重新保存配方。"
+    };
+    for (const k of keys) food[k] = sum.unknown.includes(k) ? null : sum[k] * 100 / grams;
+    return validateFood(food);
+  }
+  const counted = (f) => f.countMode === true || f.id === "reference-usda-01123";
+  const portionStep = (r) => counted(r.food) ? r.food.unitGrams : r.step;
   function validateFood(f) {
     if (
       !f ||
@@ -28,19 +54,17 @@
     for (const k of keys)
       if (f[k] !== null && !nonneg(f[k]))
         throw Error(`${f.name}：${labels[k]}必须为非负数或留空`);
-    if (!number(f.edibleRatio) || f.edibleRatio <= 0 || f.edibleRatio > 1)
-      throw Error("可食比例必须大于0且不超过100%");
-    if (!["edible", "weighed"].includes(f.nutritionBasis))
-      throw Error("营养标示口径无效");
     if (typeof f.weightMode !== "string" || !f.weightMode.trim())
       throw Error("请填写称重口径");
     if (f.unitGrams !== null && (!number(f.unitGrams) || f.unitGrams <= 0))
       throw Error("每个重量必须大于0");
     if (f.price !== null && !nonneg(f.price)) throw Error("单价无效");
+    if (f.barcode !== undefined && f.barcode !== "" &&
+        (typeof f.barcode !== "string" || !/^\d{8,14}$/.test(f.barcode)))
+      throw Error("条码请输入8至14位数字，或留空");
+    if (counted(f) && (!number(f.unitGrams) || f.unitGrams <= 0))
+      throw Error("按个计量需要填写每个可食重量");
     return f;
-  }
-  function factor(f) {
-    return f.nutritionBasis === "edible" ? f.edibleRatio : 1;
   }
   function mergeFoodPack(state, pack) {
     if (
@@ -52,10 +76,13 @@
     )
       throw Error("不是有效的轻盘食物包（qingpan-foods v1）");
     const ids = new Set();
+    const barcodes = new Set();
     for (const f of pack.foods) {
       validateFood(f);
       if (ids.has(f.id)) throw Error("食物包包含重复编号");
       ids.add(f.id);
+      if (f.barcode && barcodes.has(f.barcode)) throw Error("食物包包含重复条码");
+      if (f.barcode) barcodes.add(f.barcode);
     }
     const next = clone(state);
     const identity = (f) =>
@@ -64,16 +91,18 @@
         .join("\u0000");
     const knownIds = new Set(next.foods.map((f) => f.id));
     const knownNames = new Set(next.foods.map(identity));
+    const knownBarcodes = new Set(next.foods.map((f) => f.barcode).filter(Boolean));
     let added = 0,
       skipped = 0;
     for (const f of pack.foods) {
-      if (knownIds.has(f.id) || knownNames.has(identity(f))) {
+      if (knownIds.has(f.id) || knownNames.has(identity(f)) || (f.barcode && knownBarcodes.has(f.barcode))) {
         skipped++;
         continue;
       }
       next.foods.push(clone(f));
       knownIds.add(f.id);
       knownNames.add(identity(f));
+      if (f.barcode) knownBarcodes.add(f.barcode);
       added++;
     }
     return { state: next, added, skipped };
@@ -81,6 +110,18 @@
   function installBuiltinFoods(state, pack) {
     // Validate the complete catalog before touching any existing state.
     mergeFoodPack(initialState(), pack);
+    const originalFoods = JSON.stringify(state.foods);
+    state = clone(state);
+    // User-confirmed duplicate product. Preserve historical nutrition snapshots.
+    const aliasId = "photo-20261112-pure-nut-kernels", nutId = "photo-20261111-nuts";
+    const alias = state.foods.find(f => f.id === aliasId);
+    if (alias && !state.foods.some(f => f.id === nutId)) alias.id = nutId;
+    state.foods = state.foods.filter(f => f.id !== aliasId);
+    const nut = state.foods.find(f => f.id === nutId);
+    if (nut && nut.name === "高蛋白纯纯坚果（截图款）") {
+      nut.name = "纯坚果仁（罐装）";
+      nut.category = "坚果";
+    }
     const seen = new Set(state.builtinFoodsSeen || []);
     const unseen = pack.foods.filter((f) => !seen.has(f.id));
     const result = mergeFoodPack(state, { ...pack, foods: unseen });
@@ -88,7 +129,8 @@
       ...new Set([...seen, ...pack.foods.map((f) => f.id)]),
     ];
     result.changed =
-      result.added > 0 || result.state.builtinFoodsSeen.length !== seen.size;
+      result.added > 0 || result.state.builtinFoodsSeen.length !== seen.size ||
+      JSON.stringify(result.state.foods) !== originalFoods;
     return result;
   }
   function totals(rows) {
@@ -99,7 +141,7 @@
       for (const k of keys) {
         if (r.food[k] === null || !nonneg(r.food[k])) {
           if (r.grams > 0 && !out.unknown.includes(k)) out.unknown.push(k);
-        } else out[k] += (r.food[k] * r.grams * factor(r.food)) / 100;
+        } else out[k] += (r.food[k] * r.grams) / 100;
       }
     }
     return out;
@@ -173,10 +215,14 @@
         throw Error(`${r.food.name}：重量范围须在0–10000g，且下限不高于上限`);
       if (![1, 5, 10].includes(r.step))
         throw Error("取整单位只支持1g、5g或10g");
+      if (r.food.isComposite && !r.fixed)
+        throw Error(`${r.food.name}：组合套餐必须固定整数份数`);
+      if (r.fixed && counted(r.food) && Math.abs(r.grams / r.food.unitGrams - Math.round(r.grams / r.food.unitGrams)) > 1e-6)
+        throw Error(r.food.name + "：固定数量必须为整数个");
       if (typeof r.fixed !== "boolean") throw Error("固定重量模式无效");
       if (r.fixed && (r.grams < r.min || r.grams > r.max))
         throw Error(`${r.food.name}固定重量不在最小和最大范围内`);
-      if (!r.fixed && Math.ceil(r.min / r.step) > Math.floor(r.max / r.step))
+      if (!r.fixed && Math.ceil(r.min / portionStep(r)) > Math.floor(r.max / portionStep(r)))
         throw Error(
           `${r.food.name}的范围内没有${r.step}g的整数倍，请调整范围或步长`,
         );
@@ -239,27 +285,27 @@
           ? { kcal: 3, protein: 4, fat: 1, carbs: 1 }
           : { kcal: 4, protein: 5, fat: 2, carbs: 2 };
     rows.forEach((r, i) => {
-      const scale = r.fixed ? 1 : r.step;
+      const scale = r.fixed ? 1 : portionStep(r);
       const v = {
         cost:
           0.000001 +
           (variant === "B"
-            ? ((r.food.sodium * factor(r.food) * scale) /
+            ? ((r.food.sodium * scale) /
                 100 /
                 Math.max(t.sodium, 1)) *
               8
             : 0),
       };
       for (const k of constraintKeys(t)) {
-        v[k] = (r.food[k] * factor(r.food) * scale) / 100;
+        v[k] = (r.food[k] * scale) / 100;
         v["aim_" + k] = v[k];
       }
       v["portion_" + i] = scale;
       model.constraints["portion_" + i] = r.fixed
         ? { equal: r.grams }
         : {
-            min: Math.ceil(r.min / r.step) * r.step,
-            max: Math.floor(r.max / r.step) * r.step,
+            min: Math.ceil(r.min / portionStep(r)) * portionStep(r),
+            max: Math.floor(r.max / portionStep(r)) * portionStep(r),
           };
       if (!r.fixed) model.ints["x" + i] = 1;
       model.variables["x" + i] = v;
@@ -289,7 +335,7 @@
         model.constraints[c] = {
           equal: r.min / (r.max - r.min) - a.min / (a.max - a.min),
         };
-        model.variables["x" + i][c] = r.step / (r.max - r.min);
+        model.variables["x" + i][c] = portionStep(r) / (r.max - r.min);
         model.variables["x" + anchor.i][c] = -a.step / (a.max - a.min);
         model.variables["spreadLow" + i] = { [c]: 1, cost: 6 };
         model.variables["spreadHigh" + i] = { [c]: -1, cost: 6 };
@@ -348,7 +394,7 @@
     const output = clone(rows);
     output.forEach((r, i) => {
       const x = result["x" + i] || 0;
-      r.grams = r.fixed ? r.grams : Math.round(x) * r.step;
+      r.grams = r.fixed ? r.grams : Math.round(x) * portionStep(r);
     });
     // Independent post-solve verification: never trust solver flags alone.
     for (let i = 0; i < rows.length; i++) {
@@ -374,9 +420,9 @@
         let lo = 0,
           hi = 0;
         rows.forEach((r) => {
-          const a = (r.food[k] * factor(r.food)) / 100;
-          lo += a * (r.fixed ? r.grams : Math.ceil(r.min / r.step) * r.step);
-          hi += a * (r.fixed ? r.grams : Math.floor(r.max / r.step) * r.step);
+          const a = (r.food[k]) / 100;
+          lo += a * (r.fixed ? r.grams : Math.ceil(r.min / portionStep(r)) * portionStep(r));
+          hi += a * (r.fixed ? r.grams : Math.floor(r.max / portionStep(r)) * portionStep(r));
         });
         if (b[k].min !== undefined && hi < b[k].min - 1e-5)
           diagnostics.push(
@@ -473,6 +519,8 @@
     unique(s.profiles);
     unique(s.templates);
     s.foods.forEach(validateFood);
+    const codes = s.foods.map(f => f.barcode).filter(Boolean);
+    if (new Set(codes).size !== codes.length) throw Error("食物库包含重复条码");
     s.profiles.forEach((t) => {
       targetBounds(t);
       if (typeof t.name !== "string" || !t.name.trim())
@@ -536,7 +584,9 @@
     validateFood,
     mergeFoodPack,
     installBuiltinFoods,
-    factor,
+    counted,
+    portionStep,
+    compositeFood,
     totals,
     targetBounds,
     validateRows,

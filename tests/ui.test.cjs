@@ -145,6 +145,8 @@ test("DOM：食品新增、kJ换算、搜索、编辑、删除与转义", option
   try {
     click(t, '[data-action="new-food"]');
     const form = t.$("#food-form");
+    assert.equal(form.elements.ediblePercent, undefined);
+    assert.equal(form.elements.nutritionBasis, undefined);
     for (const [k, v] of Object.entries({
       name: "<img src=x onerror=alert(1)>",
       energyUnit: "kj",
@@ -531,3 +533,110 @@ test(
     }
   },
 );
+
+// Simulate reopening an existing browser after pulling an expanded catalog.
+test("DOM：旧食物库刷新补入新增调料，支持分类筛选与编辑保留分类", options, async () => {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, "data/foods.json"), "utf8"));
+  const old = C.installBuiltinFoods(C.initialState(), { ...catalog, foods: catalog.foods.slice(0, 19) }).state;
+  const t = setup(old, true);
+  try {
+    await route(t, "foods");
+    assert.equal(t.state().foods.length, catalog.foods.length);
+    for (const name of ["葱姜料酒", "生抽（照片款）", "上等蚝油", "蒸鱼豉油（照片款）"])
+      assert.ok(t.$("#food-table").textContent.includes(name));
+    click(t, '[data-action="filter"][data-value="调味品"]');
+    const condiments = t.state().foods.filter((f) => f.category === "调味品");
+    assert.equal(t.all("tbody tr").length, condiments.length);
+    assert.ok(t.$("#food-table").textContent.includes("蒸鱼豉油（照片款）"));
+    click(t, '[data-action="edit-food"][data-id="photo-20261112-haitian-light-soy-sauce"]');
+    assert.equal(t.$("#food-form").elements.category.value, "调味品");
+    submit(t, "#food-form");
+    assert.equal(t.state().foods.find(f => f.id === "photo-20261112-haitian-light-soy-sauce").category, "调味品");
+  } finally { t.close(); }
+});
+
+test("DOM：鸡蛋按个增减，实际记录独立，条码重复新增被阻止", options, async () => {
+  const t = setup(undefined, true);
+  try {
+    click(t, '[data-action="add-food"][data-id="reference-usda-01123"]');
+    const getEgg = () => Object.values(t.state().days)[0].plan.find(r => r.food.id === "reference-usda-01123");
+    assert.equal(getEgg().grams, 50);
+    click(t, '[data-action="count-plus"]');
+    assert.equal(getEgg().grams, 100);
+    click(t, '[data-action="count-minus"]');
+    assert.equal(getEgg().grams, 50);
+    change(t, '[data-field="count"]', '7');
+    assert.equal(getEgg().grams, 350);
+    click(t, '[data-action="copy-actual"]');
+    await route(t, "records");
+    click(t, '[data-action="count-minus"][data-actual="true"]');
+    assert.equal(Object.values(t.state().days)[0].actual[0].grams, 300);
+    assert.equal(getEgg().grams, 350);
+    await route(t, "foods");
+    click(t, '[data-action="edit-food"][data-id="reference-usda-01123"]');
+    t.$("#food-form").elements.barcode.value = "0123456789012";
+    submit(t, "#food-form");
+    assert.equal(t.state().foods.find(f=>f.id==="reference-usda-01123").barcode, "0123456789012");
+    const count = t.state().foods.length;
+    click(t, '[data-action="new-food"]');
+    const form=t.$("#food-form");
+    for(const [k,v] of Object.entries({name:"重复商品",barcode:"0123456789012",energy:"100",protein:"10",fat:"2",carbs:"10",sodium:"0",weightMode:"净重"}))form.elements[k].value=v;
+    submit(t, "#food-form");
+    assert.equal(t.state().foods.length, count);
+    assert.match(t.$("#toast").textContent, /条码已有/);
+  } finally { t.close(); }
+});
+
+test("DOM：配方保存为整体套餐、整数份增减、编辑与备份保留配方", options, async () => {
+  const t=setup(fixture());
+  try {
+    click(t, '[data-action="new-combo"]');
+    t.$('#combo-form').elements.name.value='吃鱼料汁';
+    t.$('.combo-ingredient input').value='20';
+    click(t, '[data-action="combo-add"]');
+    t.all('.combo-ingredient input')[1].value='30';
+    submit(t,'#combo-form');
+    const combo=t.state().foods.find(f=>f.name==='吃鱼料汁');
+    assert.ok(combo.isComposite);
+    assert.equal(combo.unitGrams,50);
+    assert.equal(combo.ingredients.length,2);
+    click(t, '[data-action="add-food"][data-id="'+combo.id+'"]');
+    const plan=()=>Object.values(t.state().days)[0].plan;
+    assert.equal(plan().length,1);
+    assert.equal(plan()[0].fixed,true);
+    assert.equal(plan()[0].grams,50);
+    assert.ok(t.$('#app').textContent.includes('不拆分原料'));
+    change(t,'[data-field="count"]','0.5');
+    assert.equal(plan()[0].grams,50);
+    assert.match(t.$('#toast').textContent,/整数/);
+    click(t,'[data-action="count-plus"]');
+    assert.equal(plan()[0].grams,100);
+    await route(t,'foods');
+    click(t,'[data-action="edit-food"][data-id="'+combo.id+'"]');
+    t.all('.combo-ingredient input')[0].value='40';
+    submit(t,'#combo-form');
+    assert.equal(t.state().foods.find(f=>f.id===combo.id).unitGrams,70);
+    assert.equal(plan()[0].food.unitGrams,50);
+    const restored=setup(t.state());
+    try { assert.equal(restored.state().foods.find(f=>f.id===combo.id).ingredients.length,2); }
+    finally { restored.close(); }
+  } finally {t.close();}
+});
+
+test("DOM：已保存的套餐可直接转换为整体，转换不改动原套餐", options, async () => {
+  const state=fixture();
+  state.templates=[{id:'sauce-template',name:'吃鱼料汁',meals:['全天'],target:state.profiles[0],rows:[{id:'sauce-part',food:state.foods[0],meal:'全天',grams:30,min:0,max:500,step:5,fixed:false}]}];
+  const t=setup(state);
+  try {
+    await route(t,'templates');
+    click(t,'[data-action="template-combo"]');
+    assert.equal(t.$('#combo-form').elements.name.value,'吃鱼料汁');
+    submit(t,'#combo-form');
+    const combo=t.state().foods.find(f=>f.isComposite);
+    assert.equal(combo.unitGrams,30);
+    assert.equal(t.state().templates[0].rows[0].grams,30);
+    await route(t,'today');
+    click(t,'[data-action="add-food"][data-id="'+combo.id+'"]');
+    assert.equal(Object.values(t.state().days)[0].plan.length,1);
+  } finally {t.close();}
+});

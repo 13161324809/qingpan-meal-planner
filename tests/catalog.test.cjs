@@ -6,6 +6,19 @@ const C = require("../core.js");
 const catalog = JSON.parse(
   fs.readFileSync(require.resolve("../data/foods.json"), "utf8"),
 );
+
+test("用户确认的两个坚果迁移为一条，历史营养快照保持原样", () => {
+  const state = C.installBuiltinFoods(C.initialState(), catalog).state;
+  const nut = state.foods.find(f => f.id === "photo-20261111-nuts");
+  nut.name = "高蛋白纯纯坚果（截图款）";
+  state.foods.push({ ...nut, id: "photo-20261112-pure-nut-kernels", name: "纯坚果仁（罐装）" });
+  const result = C.installBuiltinFoods(state, catalog);
+  assert.equal(result.changed, true);
+  assert.equal(result.state.foods.filter(f => /坚果/.test(f.name)).length, 1);
+  assert.equal(result.state.foods.find(f => f.id === nut.id).name, "纯坚果仁（罐装）");
+  assert.equal(state.foods.length, catalog.foods.length + 1);
+  assert.equal(C.installBuiltinFoods(result.state, catalog).changed, false);
+});
 test("自带JSON与离线脚本一致，营养数据经过校验，缺失值保留未知", () => {
   const ctx = {};
   vm.createContext(ctx);

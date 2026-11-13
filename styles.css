@@ -553,6 +553,22 @@ main {
   font-size: 11px;
   color: #8c9786;
 }
+.row-card.all-day:has(.count-controls) {
+  grid-template-columns: minmax(0, 1fr) 190px 30px;
+}
+.row-weight:has(.count-controls):after { content: none; }
+.count-controls { display: flex; align-items: center; gap: 5px; }
+.count-controls button { min-width: 36px; min-height: 38px; padding: 4px; }
+.count-controls input { width: 58px; min-width: 0; padding: 6px; text-align: center; }
+.combo-ingredient { display: grid; grid-template-columns: minmax(0, 1fr) 90px auto; align-items: end; gap: 8px; margin: 12px 0; }
+.combo-ingredient select { width: 100%; min-width: 0; }
+.combo-ingredient label { min-width: 0; }
+.row-weight > small { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
+@media (max-width: 600px) {
+  .row-card.all-day:has(.count-controls) { grid-template-columns: minmax(0, 1fr) 30px; }
+  .row-card:has(.count-controls) > .row-weight { grid-column: 1; grid-row: 2; }
+  .row-card:has(.count-controls) > .icon-button { grid-column: 2; grid-row: 1; }
+}
 .icon-button {
   border: 0;
   padding: 4px 7px;

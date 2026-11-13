@@ -22,7 +22,7 @@
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
   const KEY = "qingpan.v1",
-    categories = ["肉类", "鱼类", "主食", "蔬菜", "蛋奶", "饮品", "其他"];
+    categories = ["肉类", "鱼类", "主食", "蔬菜", "蛋奶", "饮品", "水果", "坚果", "调味品", "油脂", "其他"];
   const builtinFoods = globalThis.QingpanBuiltinFoods || null;
   let state,
     storageError = "",
@@ -162,10 +162,13 @@
     return state.foods.filter(
       (f) =>
         (category === "全部" || f.category === category) &&
-        `${f.name} ${f.brand} ${f.flavor}`
+        `${f.name} ${f.brand} ${f.flavor} ${f.barcode || ""}`
           .toLowerCase()
           .includes(search.toLowerCase()),
     );
+  }
+  function foodCategories() {
+    return [...new Set([...categories, ...state.foods.map((f) => f.category).filter(Boolean)])];
   }
   function filters() {
     const foodActions =
@@ -175,15 +178,16 @@
             ? '<button data-action="restore-builtin">恢复自带食物</button>'
             : "")
         : "";
-    return `<div class="toolbar"><input id="search" aria-label="搜索食物" placeholder="搜索食物、品牌或口味" value="${esc(search)}"><button data-action="new-food">＋ 新增食物</button>${foodActions}</div><div class="chip-row">${["全部", ...categories].map((c) => `<button class="chip ${c === category ? "active" : ""}" data-action="filter" data-value="${c}">${c}</button>`).join("")}</div>`;
+    return `<div class="toolbar"><input id="search" aria-label="搜索食物" placeholder="搜索食物、品牌或口味" value="${esc(search)}"><button data-action="new-food">＋ 新增食物</button><button data-action="new-combo">＋ 组合套餐</button>${foodActions}</div><div class="chip-row">${["全部", ...foodCategories()].map((c) => `<button class="chip ${c === category ? "active" : ""}" data-action="filter" data-value="${esc(c)}">${c}</button>`).join("")}</div>`;
   }
+  const productId = (id) => id === "photo-20261112-pure-nut-kernels" ? "photo-20261111-nuts" : id;
   function picker() {
     return (
       filteredFoods()
-        .filter((f) => !day().plan.some((r) => r.food.id === f.id))
+        .filter((f) => !day().plan.some((r) => productId(r.food.id) === productId(f.id)))
         .map(
           (f) =>
-            `<div class="pick-item"><div><div class="food-name">${esc(f.name)} <small>${esc(f.brand)}</small></div><div class="food-meta">${f.kcal === null ? "能量未知" : fmt(f.kcal) + " kcal /100g营养标示"} · ${esc(f.weightMode)}${f.edibleRatio !== 1 ? " · 可食 " + fmt(f.edibleRatio * 100) + "%" : ""}</div></div><button data-action="add-food" data-id="${esc(f.id)}">＋ 选用</button></div>`,
+            `<div class="pick-item"><div><div class="food-name">${esc(f.name)} <small>${esc(f.brand)}</small></div><div class="food-meta">${f.kcal === null ? "能量未知" : fmt(f.kcal) + " kcal /100g营养标示"} · ${esc(f.weightMode)}</div></div><button data-action="add-food" data-id="${esc(f.id)}">＋ 选用</button></div>`,
         )
         .join("") ||
       empty(
@@ -195,12 +199,33 @@
       )
     );
   }
+  function countControls(r, actual) {
+    const n = r.grams / r.food.unitGrams;
+    const unit = r.food.isComposite ? "份" : "个";
+    return `<div class="count-controls"><button type="button" aria-label="减少一${unit}${esc(r.food.name)}" data-action="count-minus" data-id="${esc(r.id)}" data-actual="${actual}">−</button><input aria-label="${esc(r.food.name)}${unit}数" type="number" min="0" max="${Math.floor(10000 / r.food.unitGrams)}" step="1" value="${n}" data-row="${esc(r.id)}" data-field="count" data-actual="${actual}"><span>${unit}</span><button type="button" aria-label="增加一${unit}${esc(r.food.name)}" data-action="count-plus" data-id="${esc(r.id)}" data-actual="${actual}">＋</button></div><small>${r.food.isComposite ? "每份配方 " + fmt(r.food.unitGrams) + "g" : "每个可食 " + fmt(r.food.unitGrams) + "g（估算，可编辑校准）"}<br>共 ${fmt(r.grams)}g</small>`;
+  }
+  function countRange(r) {
+    if (r.food.isComposite) return '<div class="constraints">整体份数固定，不拆分原料，不参与自动调整</div>';
+    const unit = r.food.isComposite ? "份" : "个";
+    return `<div class="constraints"><label>数量范围 <input aria-label="最少个数" type="number" min="0" step="1" value="${Math.ceil(r.min / r.food.unitGrams)}" data-row="${esc(r.id)}" data-field="minCount">—<input aria-label="最多个数" type="number" min="0" step="1" value="${Math.floor(r.max / r.food.unitGrams)}" data-row="${esc(r.id)}" data-field="maxCount"> ${unit}</label><span>自动计算按整数${unit}</span><label class="fixed"><input type="checkbox" ${r.fixed ? "checked" : ""} data-row="${esc(r.id)}" data-field="fixed"> 固定数量</label></div>`;
+  }
+  function changeCount(el, delta) {
+    const actual = el.dataset.actual === "true";
+    const r = day()[actual ? "actual" : "plan"].find(r => r.id === el.dataset.id);
+    if (!r || !C.counted(r.food)) throw Error("按个计量的食物不存在");
+    const count = Math.max(0, Math.round(r.grams / r.food.unitGrams) + delta);
+    if (count * r.food.unitGrams > 10000) throw Error("数量超出上限");
+    r.grams = count * r.food.unitGrams;
+    if (!actual) invalidate();
+    persist();
+    render();
+  }
   function rowsView(rows, actual = false) {
     const d = day();
     return ["全天"]
       .map((m) => {
         const rs = rows;
-        return `<div class="meal-head"><strong>${esc(m)} <small> / ${rs.length} 种食物</small></strong><small>${fmt(C.totals(rs).kcal)} kcal${C.totals(rs).unknown.length ? " · 数据不全" : ""}</small></div>${rs.map((r) => `<div class="row-card all-day"><div><div class="food-name">${esc(r.food.name)}</div><div class="food-meta">${esc(r.food.weightMode)}${r.food.edibleRatio !== 1 ? " · 可食率 " + fmt(r.food.edibleRatio * 100) + "%" : ""}</div>${r.food.unitGrams ? `<div class="row-unit">≈ ${fmt(r.grams / r.food.unitGrams)} 个／份 <button class="text-button" data-action="unit" data-id="${esc(r.id)}" data-actual="${actual}">按个输入</button></div>` : ""}</div><div class="row-weight"><input aria-label="${esc(r.food.name)}克数" type="number" min="0" max="10000" step="any" value="${r.grams}" data-row="${esc(r.id)}" data-field="grams" data-actual="${actual}"></div><button class="icon-button" aria-label="移除${esc(r.food.name)}" data-action="remove-row" data-id="${esc(r.id)}" data-actual="${actual}">×</button>${actual ? "" : `<div class="constraints"><label>范围 <input aria-label="最小克数" type="number" min="0" max="10000" value="${r.min}" data-row="${esc(r.id)}" data-field="min">—<input aria-label="最大克数" type="number" min="0" max="10000" value="${r.max}" data-row="${esc(r.id)}" data-field="max"> g</label><label>步长 <select data-row="${esc(r.id)}" data-field="step" aria-label="取整单位">${[1, 5, 10].map((x) => `<option ${x === r.step ? "selected" : ""} value="${x}">${x}g</option>`).join("")}</select></label><label class="fixed"><input type="checkbox" ${r.fixed ? "checked" : ""} data-row="${esc(r.id)}" data-field="fixed"> 固定重量</label></div>`}</div>`).join("")}${rs.length ? `<div class="nutrition-line">${nutritionLine(rs)}</div>` : '<p class="section-note">这一餐还未添加食物</p>'}`;
+        return `<div class="meal-head"><strong>${esc(m)} <small> / ${rs.length} 种食物</small></strong><small>${fmt(C.totals(rs).kcal)} kcal${C.totals(rs).unknown.length ? " · 数据不全" : ""}</small></div>${rs.map((r) => `<div class="row-card all-day"><div><div class="food-name">${esc(r.food.name)}</div><div class="food-meta">${esc(r.food.weightMode)}</div>${r.food.unitGrams && !C.counted(r.food) ? `<div class="row-unit">≈ ${fmt(r.grams / r.food.unitGrams)} 个／份 <button class="text-button" data-action="unit" data-id="${esc(r.id)}" data-actual="${actual}">按个输入</button></div>` : ""}</div><div class="row-weight">${C.counted(r.food) ? countControls(r, actual) : `<input aria-label="${esc(r.food.name)}克数" type="number" min="0" max="10000" step="any" value="${r.grams}" data-row="${esc(r.id)}" data-field="grams" data-actual="${actual}">`}</div><button class="icon-button" aria-label="移除${esc(r.food.name)}" data-action="remove-row" data-id="${esc(r.id)}" data-actual="${actual}">×</button>${actual ? "" : C.counted(r.food) ? countRange(r) : `<div class="constraints"><label>范围 <input aria-label="最小克数" type="number" min="0" max="10000" value="${r.min}" data-row="${esc(r.id)}" data-field="min">—<input aria-label="最大克数" type="number" min="0" max="10000" value="${r.max}" data-row="${esc(r.id)}" data-field="max"> g</label><label>步长 <select data-row="${esc(r.id)}" data-field="step" aria-label="取整单位">${[1, 5, 10].map((x) => `<option ${x === r.step ? "selected" : ""} value="${x}">${x}g</option>`).join("")}</select></label><label class="fixed"><input type="checkbox" ${r.fixed ? "checked" : ""} data-row="${esc(r.id)}" data-field="fixed"> 固定重量</label></div>`}</div>`).join("")}${rs.length ? `<div class="nutrition-line">${nutritionLine(rs)}</div>` : '<p class="section-note">这一餐还未添加食物</p>'}`;
       })
       .join("");
   }
@@ -218,7 +243,7 @@
   function foodTable() {
     const fs = filteredFoods();
     return fs.length
-      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div><div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}<br>可食 ${fmt(f.edibleRatio * 100)}% · 标示按${f.nutritionBasis === "edible" ? "可食部分" : "称重口径"}</div>${f.notes ? `<div class="food-notes">${esc(f.notes)}</div>` : ""}</td>${C.keys.map((k) => `<td>${f[k] === null ? (k === "sodium" ? '<span class="badge">未提供（选填）</span>' : '<span class="badge warn">待补全</span>') : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
+      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div>${f.barcode ? `<small>条码 ${esc(f.barcode)}</small>` : ""}<div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}</div>${f.notes ? `<div class="food-notes">${esc(f.notes)}</div>` : ""}</td>${C.keys.map((k) => `<td>${f[k] === null ? (k === "sodium" ? '<span class="badge">未提供（选填）</span>' : '<span class="badge warn">待补全</span>') : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
       : empty(
           "建立自己的食物库",
           "营养数据由你录入，可长期重复使用。",
@@ -233,7 +258,7 @@
           ? `系统自带 ${builtinFoods.foods.length} 种食物 · 当前 ${state.foods.length} 种。可新增、修改或删除，个人修改保存在此浏览器。`
           : "保存真实营养标签，下次选用无需重复录入。",
       ) +
-      `<section class="panel">${filters()}<div class="section-note">以下均为每100g营养标示值。实际营养依照称重口径与可食比例换算。</div><div class="table-scroll" id="food-table">${foodTable()}</div></section>`
+      `<section class="panel">${filters()}<div class="section-note">以下均为每100g营养标示值。克数填写实际食用净重，营养按克数直接计算。</div><div class="table-scroll" id="food-table">${foodTable()}</div></section>`
     );
   }
   function templates() {
@@ -263,7 +288,7 @@
               )
               .join(
                 "",
-              )}<p class="nutrition-line">${nutritionLine(t.rows)}</p><div class="actions"><button class="primary" data-action="apply-template" data-id="${esc(t.id)}">应用到今天</button><button data-action="edit-template" data-id="${esc(t.id)}">修改</button><button class="text-button" data-action="duplicate-template" data-id="${esc(t.id)}">复制</button><button class="text-button" data-action="rename-template" data-id="${esc(t.id)}">重命名</button><button class="text-button" data-action="delete-template" data-id="${esc(t.id)}">删除</button></div></section>`,
+              )}<p class="nutrition-line">${nutritionLine(t.rows)}</p><div class="actions"><button class="primary" data-action="apply-template" data-id="${esc(t.id)}">应用到今天</button><button data-action="edit-template" data-id="${esc(t.id)}">修改</button><button data-action="template-combo" data-id="${esc(t.id)}">保存为整体</button><button class="text-button" data-action="duplicate-template" data-id="${esc(t.id)}">复制</button><button class="text-button" data-action="rename-template" data-id="${esc(t.id)}">重命名</button><button class="text-button" data-action="delete-template" data-id="${esc(t.id)}">删除</button></div></section>`,
         )
         .join("")}</div>`
     );
@@ -313,9 +338,37 @@
         ? `<div class="notice error">${esc(storageError)} <button data-action="raw-export">导出原始数据</button></div>`
         : "") + { today, foods, templates, records, settings }[page]();
   }
+  let comboDraft = [];
+  function addComboIngredient(food, grams = 1) {
+    const choices = state.foods.filter(f => !f.isComposite);
+    food = food || choices[0];
+    if (!food) throw Error("请先录入原料食物");
+    if (!choices.some(f => f.id === food.id)) choices.push(food);
+    const index = comboDraft.push(C.clone(food)) - 1;
+    const row = document.createElement("div");
+    row.className = "combo-ingredient";
+    row.dataset.index = index;
+    row.innerHTML = `<label>原料<select aria-label="配方原料">${choices.map(f => `<option value="${esc(f.id)}" ${f.id === food.id ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</select></label><label>克数<input aria-label="原料克数" type="number" min="0.001" max="10000" step="any" required value="${grams}"></label><button type="button" data-action="combo-remove">移除</button>`;
+    $("#combo-ingredients").append(row);
+  }
+  function openCombo(food, template) {
+    const form = $("#combo-form");
+    form.reset();
+    form.elements.id.value = food?.id || "";
+    form.elements.name.value = food?.name || template?.name || "";
+    comboDraft = [];
+    $("#combo-ingredients").innerHTML = "";
+    const rows = food?.ingredients || template?.rows;
+    if (rows) rows.filter(r => r.grams > 0).forEach(r => addComboIngredient(r.food, r.grams));
+    else addComboIngredient();
+    $("#combo-dialog").showModal();
+  }
   function openFood(id) {
+    const composite = state.foods.find(f => f.id === id && f.isComposite);
+    if (composite) { openCombo(composite); return; }
     const form = $("#food-form");
     form.reset();
+    form.elements.category.innerHTML = opts(foodCategories(), categories[0]);
     const f = state.foods.find((f) => f.id === id);
     $("#food-dialog-title").textContent = f ? "编辑食物" : "新增食物";
     form.elements.id.value = f?.id || "";
@@ -324,9 +377,9 @@
         "name",
         "category",
         "brand",
+        "barcode",
         "flavor",
         "weightMode",
-        "nutritionBasis",
         "unitGrams",
         "price",
         "notes",
@@ -334,8 +387,8 @@
       ])
         form.elements[k].value = f[k] ?? "";
       form.elements.energy.value = f.kcal ?? "";
-      form.elements.ediblePercent.value = f.edibleRatio * 100;
     }
+    form.elements.countMode.checked = f ? C.counted(f) : false;
     $("#food-dialog").showModal();
   }
   function naming(title, initial, fn) {
@@ -457,6 +510,10 @@
     }
   }
   const actions = {
+    "new-combo": () => openCombo(),
+    "combo-add": () => addComboIngredient(),
+    "combo-remove": (el) => el.closest(".combo-ingredient").remove(),
+    "template-combo": (el) => openCombo(null, state.templates.find(t => t.id === el.dataset.id)),
     "cancel-solve": () => solveJob?.cancel(),
     "restore-builtin": () => {
       if (!builtinFoods) throw Error("自带食物库未加载，请刷新后重试");
@@ -492,7 +549,7 @@
       if (day().plan.length >= 60) throw Error("每次配餐最多60项");
       const f = state.foods.find((f) => f.id === el.dataset.id);
       if (!f) throw Error("食物不存在，请刷新后重试");
-      if (day().plan.some((r) => r.food.id === f.id)) {
+      if (day().plan.some((r) => productId(r.food.id) === productId(f.id))) {
         toast("今天已选过这种食物，修改克数即可；移除后可以重新选择");
         return;
       }
@@ -500,11 +557,11 @@
         id: uid(),
         food: C.clone(f),
         meal: day().meals[0],
-        grams: 100,
+        grams: C.counted(f) ? f.unitGrams : 100,
         min: 0,
-        max: 500,
+        max: f.isComposite ? 10000 : 500,
         step: 5,
-        fixed: false,
+        fixed: f.isComposite === true,
       });
       invalidate();
       persist();
@@ -518,6 +575,8 @@
       persist();
       render();
     },
+    "count-minus": (el) => changeCount(el, -1),
+    "count-plus": (el) => changeCount(el, 1),
     unit: (el) => {
       const rs = day()[el.dataset.actual === "true" ? "actual" : "plan"];
       const r = rs.find((r) => r.id === el.dataset.id);
@@ -727,6 +786,22 @@
         const r = day()[actual ? "actual" : "plan"].find(
           (r) => r.id === el.dataset.row,
         );
+        const field = el.dataset.field;
+        if (["count", "minCount", "maxCount"].includes(field)) {
+          const count = Number(el.value);
+          if (!el.value.trim() || !Number.isInteger(count) || count < 0 || count * r.food.unitGrams > 10000) {
+            render();
+            throw Error("请输入有效的非负整数个数");
+          }
+          const key = {count:"grams", minCount:"min", maxCount:"max"}[field];
+          const grams = count * r.food.unitGrams;
+          if ((key === "min" && grams > r.max) || (key === "max" && grams < r.min)) {
+            render(); throw Error("最少个数不能大于最多个数");
+          }
+          r[key] = grams;
+          if (!actual) invalidate();
+          persist(); render(); return;
+        }
         const k = el.dataset.field;
         const v =
           k === "fixed"
@@ -752,6 +827,26 @@
       }
     }),
   );
+  $("#combo-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    guarded(() => {
+      const form = e.target;
+      const rows = [...document.querySelectorAll(".combo-ingredient")].map(el => {
+        const id = el.querySelector("select").value;
+        const snapshot = comboDraft[Number(el.dataset.index)];
+        const food = snapshot?.id === id ? snapshot : state.foods.find(f => f.id === id);
+        if (!food) throw Error("原料已不存在，请重新选择");
+        return {food, grams: Number(el.querySelector("input").value)};
+      });
+      const food = C.compositeFood(form.elements.id.value || uid(), form.elements.name.value, rows);
+      const index = state.foods.findIndex(f => f.id === food.id);
+      if (index < 0) state.foods.push(food); else state.foods[index] = food;
+      persist();
+      $("#combo-dialog").close();
+      render();
+      toast("组合套餐已保存，每日可作为一个整体选用；已有记录保留原配方快照");
+    });
+  });
   $("#food-form").addEventListener("submit", (e) => {
     e.preventDefault();
     guarded(() => {
@@ -764,6 +859,8 @@
         name: text("name"),
         category: text("category"),
         brand: text("brand"),
+        barcode: text("barcode"),
+        countMode: form.elements.countMode.checked,
         flavor: text("flavor"),
         kcal:
           num("energy") === null
@@ -776,13 +873,13 @@
         carbs: num("carbs"),
         sodium: num("sodium"),
         weightMode: text("weightMode"),
-        edibleRatio: num("ediblePercent") / 100,
-        nutritionBasis: text("nutritionBasis"),
         unitGrams: num("unitGrams"),
         price: num("price"),
         notes: text("notes"),
       };
       C.validateFood(f);
+      if (f.barcode && state.foods.some(other => other.id !== f.id && other.barcode === f.barcode))
+        throw Error("该条码已有食物，请编辑原记录，不要重复添加");
       const i = state.foods.findIndex((x) => x.id === f.id);
       if (i < 0) state.foods.push(f);
       else state.foods[i] = f;

@@ -6,7 +6,7 @@
 
 现另含可选字段 `builtinFoodsSeen: string[]`，保存已经初始化过的自带食物编号。`data/foods.json` 是公开随应用发布的系统基础库；初始化只添加未见过的编号，随后个人删除和编辑通过本地完整食物表及此元数据保留，不由重新载入基础库覆盖。完整备份同时保留初始化记录，兼容不含此字段的旧备份。
 
-- Food：`id,name,brand,flavor,category,kcal,protein,fat,carbs,sodium,weightMode,edibleRatio,nutritionBasis,unitGrams,price,notes`。营养字段是每100g标示值，`null`代表未知，零与未知严格区分。`price`为每100g实际称重口径的可选单价，当前版本只保存，不作为优化目标。
+- Food：`id,name,brand,flavor,category,kcal,protein,fat,carbs,sodium,weightMode,unitGrams,countMode,barcode,price,notes`。营养字段是每100g标示值，`null`代表未知，零与未知严格区分。`price`为每100g实际称重口径的可选单价，当前版本只保存，不作为优化目标。
 - Target：`id,name,kcal,protein,fat,carbs,autoCarbs,sodium,energyTolerance,fatTolerance,carbTolerance`。
 - Row：`id,food,meal,grams,min,max,step,fixed`，其中food为独立快照。
 - Day：以本地日期YYYY-MM-DD为键，`{meals,target,plan:Row[],actual:Row[]}`。plan和actual互不共用对象。
@@ -14,9 +14,9 @@
 
 ## 营养系数
 
-记食物i的每100g营养k为 `a[i,k]`。如果标签按可食部分标示，系数 `p[i] = edibleRatio`，否则 `p[i] = 1`。
+记食物i的每100g营养k为 `a[i,k]`。所有克数都是用户提供的实际食用净重，不再扣减冰衣或其他比例。兼容旧备份中的 edibleRatio、nutritionBasis 字段，但不将其用于计算。
 
-`total[k] = Σ a[i,k] × p[i] × grams[i] / 100`。
+`total[k] = Σ a[i,k] × grams[i] / 100`。
 
 内部不为显示而取整；显示最多一位小数。判断容差为1e-5，避免浮点舍入产生微小假超标。热量、蛋白质、脂肪、碳水四项必须完整。钠可以为null；默认enforceSodium=false（旧目标缺少该字段也视为关闭），钠既不进入约束也不进入目标函数，缺值只作提示。enforceSodium=true时要求全部所选食物钠完整。手动记录和汇总仍区分未知与零，并将不完整的钠合计标为“已知部分”。
 
@@ -24,7 +24,7 @@
 
 求解库：jsLPSolver 1.0.3。使用其线性规划与整数约束分支搜索，避免启发式分摊热量。模型为非负变量、线性约束、线性目标。
 
-自由食物：`grams[i] = step[i] × x[i]`，`x[i]`为非负整数。
+自由食物：`grams[i] = step[i] × x[i]`，`x[i]`为非负整数。按个食物使用每个可食重量 unitGrams 代替 step，因此个数也受整数约束；固定数量须为整数个。鸡蛋暂按每个50g可食部分估算，不采用带壳总重。条码是可选字符串，食物库内唯一，导入合并时优先识别重复条码。
 
 `ceil(min[i]/step[i]) <= x[i] <= floor(max[i]/step[i])`。
 

@@ -16,8 +16,6 @@
       "sodium": 650,
       "weightMode": "干重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "按用户截图1每100g可食部录入，采用截图标示357kcal；1494kJ为原标示，不再混算。干面煮后吸水，不能用熟面重量套用。"
@@ -34,29 +32,25 @@
       "sodium": null,
       "weightMode": "干粉重量",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "按用户截图2录入。产品名称及口味被截断，未猜测完整口味；钠显示“--”，保留未知，默认可按热量和三大营养素配餐；仅严格限钠时需补包装钠数据。"
     },
     {
       "id": "photo-20261111-nuts",
-      "name": "高蛋白纯纯坚果（截图款）",
+      "name": "纯坚果仁（罐装）",
       "brand": "良品铺子",
-      "category": "其他",
-      "kcal": 670,
+      "category": "坚果",
+      "kcal": 669.9330783938814,
       "protein": 17.8,
       "fat": 63.1,
       "carbs": 5.9,
       "sodium": 6,
       "weightMode": "即食可食重量",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图3录入，产品名称未完整显示，需对照实际包装确认同款。"
+      "notes": "用户确认原高蛋白纯纯坚果截图与罐装纯坚果仁为同款，仅保留本条。每100g按包装2803kJ、蛋白质17.8g、脂肪63.1g、碳水5.9g、钠6mg。"
     },
     {
       "id": "photo-20261111-meatballs",
@@ -70,8 +64,6 @@
       "sodium": 313,
       "weightMode": "包装产品净重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "按用户截图4的自定义食物录入；肉种和品牌未提供，不作推断。称重口径暂记包装产品净重，若原记录另有口径请编辑核对。"
@@ -86,13 +78,11 @@
       "fat": 1.5,
       "carbs": 2.3,
       "sodium": 589,
-      "weightMode": "去冰衣后的净重",
+      "weightMode": "生肉净重（烹调前）",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图5每100g可食部录入。冰衣比例未知，不猜测；使用去冰衣后的净重、可食比例100%。如需按带冰重量称量，请实测后修改比例。"
+      "notes": "按用户截图5每100g可食部录入。重量按实际食用的肉重计算。"
     },
     {
       "id": "reference-usda-09040",
@@ -106,8 +96,6 @@
       "sodium": 1,
       "weightMode": "去皮生重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "USDA SR28 NDB09040每100g可食部平均参考值；按去皮重量称量。碳水为by difference，含膳食纤维，与部分中国标签口径有差异。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg09.pdf"
@@ -124,11 +112,10 @@
       "sodium": 142,
       "weightMode": "去壳生重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": 50,
       "price": null,
-      "notes": "USDA SR28 NDB01123每100g可食部；1个大鸡蛋的默认可食重量50g仅用于按个估算，应按实际大小调整。煎炒所用油另计。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg01.pdf"
+      "notes": "USDA SR28 NDB01123每100g可食部；1个大鸡蛋的默认可食重量50g仅用于按个估算，应按实际大小调整。煎炒所用油另计。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg01.pdf 用户实测7个生鸡蛋带壳共449g，平均带壳64.14g；不用于直接计算可食营养。每个可食50g仍为参考估算，可自行校准。",
+      "countMode": true
     },
     {
       "id": "reference-usda-11116",
@@ -142,8 +129,6 @@
       "sodium": 65,
       "weightMode": "去根去坏叶后的生重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "USDA SR28 NDB11116 pak-choi（小白菜/青江菜）参考，不泛指所有油菜品种；烹调油与调味料另计。碳水by difference含纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf"
@@ -160,8 +145,6 @@
       "sodium": 6880,
       "weightMode": "酱汁实际克重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "官方每约5g：4.6kcal、蛋白0.39g、碳水0.7g、盐0.86g，按×20归一。钠=盐÷2.5；脂肪标为<0.1g/份，保留未知不当作0。非用户实际瓶装标签。来源：https://uk.lkk.com/products/premium-light-soy-sauce"
@@ -178,8 +161,6 @@
       "sodium": 4533.333333333333,
       "weightMode": "酱汁实际克重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "官方每约15g：20kcal、蛋白0.2g、碳水4.7g、盐1.7g；换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。实际品牌与批次请核对。来源：https://uk.lkk.com/products/premium-oyster-sauce"
@@ -196,8 +177,6 @@
       "sodium": 1,
       "weightMode": "干重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "USDA SR28 NDB19335 Sugars, granulated每100g参考值；采用数据库能量387kcal，不强行改成碳水×4。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg19.pdf"
@@ -214,8 +193,6 @@
       "sodium": 0,
       "weightMode": "实际用油克重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "USDA SR28 NDB04044 soybean oil每100g参考；采用数据库能量884kcal，脂肪100g。烹饪实际用油需称量。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg04.pdf"
@@ -232,8 +209,6 @@
       "sodium": 6400,
       "weightMode": "酱汁实际克重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "官方每约15g：19.5kcal、蛋白1.07g、碳水3.6g、盐2.4g，换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。并非用户实际瓶装标签。来源：https://uk.lkk.com/products/seasoned-soy-sauce-for-seafood"
@@ -250,8 +225,6 @@
       "sodium": 2,
       "weightMode": "泡发前干重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "USDA SR28 NDB16108每100g干成熟黄豆参考；用于按干豆投料核算，不能套用熟豆或兑水豆浆重量。碳水by difference含纤维。应充分煮熟。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg16.pdf"
@@ -268,8 +241,6 @@
       "sodium": 60,
       "weightMode": "产品实际克重",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "按用户2026-11-11上传包装每100g录入：375kJ，蛋白质2.9g，脂肪3.3g（饱和脂肪2.3g），碳水12.0g（糖10.5g），钠60mg。能量由375kJ/4.184换算；属于含糖风味发酵乳。"
@@ -286,8 +257,6 @@
       "sodium": 580,
       "weightMode": "包装产品净重",
       "flavor": "截图款（具体口味待确认）",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "按用户2026-11-11提供的薄荷健康截图每100g可食部录入：70kcal（293kJ），蛋白质14.2g、脂肪0.6g、碳水1.6g、钠580mg。截图标题为正大食品/CP涮肉片，口味被截断；与其他藤椒鸡肉片可能为不同产品，避免合并。"
@@ -295,8 +264,6 @@
     {
       "brand": "",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "weightMode": "包装产品净重（烹调前）",
@@ -313,8 +280,6 @@
     {
       "brand": "",
       "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "weightMode": "包装产品净重（烹调前）",
@@ -326,7 +291,7 @@
       "fat": 2,
       "carbs": 0.6,
       "sodium": 647,
-      "notes": "按用户提供的抖音商品营养表，每100g：能量344kJ、蛋白质8.7g、脂肪2.0g、碳水0.6g、钠647mg。能量按344÷4.184换算。配料含黑鱼片、水、复合调味料和淀粉；品牌及冰衣比例未知，不推断。不与原有聚恒创免浆黑鱼片合并。 商品页能量与三大营养素4/9/4折算约55.2kcal不一致，保留344kJ原标示，请以实物包装核对。"
+      "notes": "按用户提供的抖音商品营养表，每100g：能量344kJ、蛋白质8.7g、脂肪2.0g、碳水0.6g、钠647mg。能量按344÷4.184换算。配料含黑鱼片、水、复合调味料和淀粉；品牌未知，不推断。重量按实际食用的肉重计算。不与原有聚恒创免浆黑鱼片合并。 商品页能量与三大营养素4/9/4折算约55.2kcal不一致，保留344kJ原标示，请以实物包装核对。"
     },
     {
       "id": "photo-20261112-spicy-chicken-meatballs",
@@ -340,29 +305,9 @@
       "sodium": 298,
       "weightMode": "包装产品净重",
       "flavor": "麻辣",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
       "notes": "按用户2026-11-12上传包装营养成分表每100g录入：501kJ（约119.7kcal）、蛋白质17.8g、脂肪2.7g、碳水5.8g、钠298mg。产品为鸡胸肉丸，具体单颗重量未知，按实际克重计算。"
-    },
-    {
-      "id": "photo-20261112-pure-nut-kernels",
-      "name": "纯坚果仁（罐装）",
-      "brand": "品牌待确认",
-      "category": "坚果",
-      "kcal": 669.9330783938814,
-      "protein": 17.8,
-      "fat": 63.1,
-      "carbs": 5.9,
-      "sodium": 6,
-      "notes": "用户包装：每100g能量2803kJ、蛋白质17.8g、脂肪63.1g、碳水5.9g、钠6mg；另含饱和脂肪7.3g、膳食纤维8.2g。罐装坚果，具体品牌未能确认。",
-      "flavor": "",
-      "edibleRatio": 1,
-      "nutritionBasis": "edible",
-      "unitGrams": null,
-      "price": null,
-      "weightMode": "包装产品净重"
     },
     {
       "id": "photo-20261112-spring-onion-ginger-cooking-wine",
@@ -471,6 +416,23 @@
       "unitGrams": null,
       "price": null,
       "weightMode": "包装产品净重"
+    },
+    {
+      "id": "photo-20261113-tomato-noodle-seasoning",
+      "name": "浓香番茄味面调料",
+      "brand": "",
+      "flavor": "浓香番茄味",
+      "category": "调味品",
+      "kcal": 187.8585086042065,
+      "protein": 3.2,
+      "fat": 12.5,
+      "carbs": 15.8,
+      "sodium": 5114,
+      "weightMode": "调料实际食用净重",
+      "unitGrams": null,
+      "price": null,
+      "barcode": "",
+      "notes": "按用户2026-11-13包装照片每100g录入：能量786kJ、蛋白质3.2g、脂肪12.5g、碳水15.8g、钠5114mg。生产商：成都市味百度食品有限公司；品牌未完整显示，条码被截断，均不猜测。按实际使用的调料克数计算。"
     }
   ]
 }

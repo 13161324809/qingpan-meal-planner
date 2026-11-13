@@ -102,6 +102,64 @@ const target = (over = {}) => ({
 const solve = (rs, t = target(), v = "A") =>
   C.solve(rs, t, ["午餐", "晚餐"], v, solver);
 
+test("组合套餐合计原料营养，固定整数份整体参与求解，未知钠保留未知", () => {
+  const a = food("sauce-a", { sodium: null });
+  const b = food("sauce-b", { kcal: 200, protein: 20, fat: 4, carbs: 20 });
+  const combo = C.compositeFood("sauce", "吃鱼料汁", [{food:a, grams:20}, {food:b, grams:30}]);
+  assert.equal(combo.unitGrams, 50);
+  assert.equal(combo.kcal, 160);
+  assert.equal(combo.sodium, null);
+  const r = row("sauce-row", combo, {grams:100, fixed:true});
+  const result = solve([r], target({kcal:160, protein:16, fat:3.2, carbs:16, enforceSodium:false}));
+  assert.equal(result.valid, true);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0].grams, 100);
+  assert.equal(result.totals.kcal, 160);
+  for (const k of ["protein", "fat", "carbs"])
+    assert.ok(Math.abs(result.totals[k] - combo[k]) < 1e-8);
+  const remaining = solve([r, row("other", food("other"))], target({
+    kcal: 260, protein: 26, fat: 5.2, carbs: 26, enforceSodium: false
+  }));
+  assert.equal(remaining.valid, true);
+  assert.equal(remaining.rows[0].grams, 100);
+  assert.equal(remaining.rows[1].grams, 100);
+  assert.equal(remaining.totals.kcal, 260);
+  assert.throws(() => solve([{...r, grams:25}], target({enforceSodium:false})), /整数个/);
+  assert.throws(() => solve([{...r, fixed:false}], target({enforceSodium:false})), /固定整数份/);
+  assert.throws(() => C.compositeFood("bad", "", []));
+  assert.throws(() => C.compositeFood("bad", "空配方", [{food:a, grams:0}]));
+  a.kcal = 999;
+  assert.equal(combo.ingredients[0].food.kcal, 100);
+});
+
+test("按个食物按完整可食重量求解，固定半个被拒绝，带壳重量不参与营养", () => {
+  const f = food("egg-count", { countMode: true, unitGrams: 50 });
+  const rs = [row("egg", f)];
+  const got = solve(rs);
+  assert.equal(got.valid, true);
+  assert.equal(got.rows[0].grams, 200);
+  const fractional = solve(rs, target({ kcal: 125, protein: 12.5, fat: 2.5, carbs: 12.5 }));
+  assert.equal(fractional.valid, false);
+  assert.throws(() => solve([row("egg", f, { fixed: true, grams: 75 })]), /整数个/);
+  assert.equal(C.totals([row("egg", f, { grams: 7 * 50 })]).kcal, 350);
+  const unusual = food("unit", { countMode: true, unitGrams: 52.3 });
+  const exact = solve([row("unit", unusual)], target({ kcal: 104.6, protein: 10.46, fat: 2.092, carbs: 10.46, sodium: 100 }));
+  assert.equal(exact.valid, true);
+  assert.ok(Math.abs(exact.rows[0].grams - 104.6) < 1e-6);
+});
+
+test("条码以字符串保留前导零，导入按条码去重，无效和重复条码拒绝", () => {
+  const a = food("a", { barcode: "0123456789012" });
+  const b = food("b", { barcode: a.barcode });
+  C.validateFood(a);
+  assert.throws(() => C.validateFood({ ...a, barcode: 123456789012 }), /条码/);
+  const state = C.initialState(); state.foods = [a];
+  const result = C.mergeFoodPack(state, { type: "qingpan-foods", version: 1, foods: [b] });
+  assert.equal(result.added, 0);
+  assert.equal(result.state.foods[0].barcode, "0123456789012");
+  assert.throws(() => C.mergeFoodPack(state, { type: "qingpan-foods", version: 1, foods: [a, b] }), /重复条码/);
+});
+
 test("默认和旧目标方案都不强制钠，缺钠仍能按热量碳蛋脂求解", () => {
   assert.equal(C.defaultTarget().enforceSodium, false);
   for (const mode of [false, undefined]) {
@@ -186,12 +244,22 @@ test("逐项核算每100g的五种营养", () => {
   }))
     assert.equal(s[k], v);
 });
-test("可食比例仅对可食口径营养应用一次", () => {
-  const f = food("ice", { edibleRatio: 0.8 });
-  assert.equal(C.totals([row("1", f, { grams: 250 })]).kcal, 200);
-  f.nutritionBasis = "weighed";
+test("实际净重直接计算五项营养，旧冰衣比例不再扣重，求解和核验口径一致", () => {
+  for (const basis of ["edible", "weighed"]) {
+    const f = food("ice", { edibleRatio: 0.8, nutritionBasis: basis });
+    C.validateFood(f);
+    const total = C.totals([row("1", f, { grams: 250 })]);
+    for (const k of C.keys) assert.equal(total[k], f[k] * 2.5);
+    const result = solve([row("1", f)]);
+    assert.equal(result.rows[0].grams, 200);
+  }
+  const f = food("net");
+  delete f.edibleRatio;
+  delete f.nutritionBasis;
+  C.validateFood(f);
   assert.equal(C.totals([row("1", f, { grams: 250 })]).kcal, 250);
 });
+
 test("未知营养值保留未知，自动配餐拒绝不完整数据", () => {
   const r = row("a", food("a", { sodium: null }), { grams: 100 });
   assert.ok(C.totals([r]).unknown.includes("sodium"));
