@@ -102,6 +102,37 @@ const target = (over = {}) => ({
 const solve = (rs, t = target(), v = "A") =>
   C.solve(rs, t, ["午餐", "晚餐"], v, solver);
 
+test("价格按实际净重、枚数和显式密度换算，不影响营养，缺价不冒充完整总额", () => {
+  const purchase = (amount,quantity,unit="g",yieldRatio=1,density=null) => ({amount,quantity,unit,yield:yieldRatio,density,estimated:false});
+  const fish=food("fish",{purchase:purchase(79.9,2500,"g",.95)});
+  const egg=food("egg",{unitGrams:50,purchase:purchase(20.99,30,"count")});
+  const oil=food("oil",{purchase:{...purchase(10.59,900,"ml",1,.92),estimated:true}});
+  const rows=[row("f",fish,{grams:237.5}),row("e",egg,{grams:350}),row("o",oil,{grams:82.8})];
+  const got=C.costs(rows);
+  assert.ok(Math.abs(got.known-(7.99+20.99/30*7+1.059))<1e-9);
+  assert.equal(got.complete,true);
+  assert.deepEqual(got.estimated,[oil.name]);
+  assert.equal(C.totals([rows[0]]).kcal,237.5);
+  const missing=food("unknown",{purchase:purchase(3.5,500,"ml")});
+  const partial=C.costs([...rows,row("m",missing,{grams:10})]);
+  assert.equal(partial.complete,false);
+  assert.equal(partial.known,got.known);
+  assert.deepEqual(partial.unknown,[missing.name]);
+  assert.equal(C.costs([row("zero",missing,{grams:0})]).complete,true);
+  assert.throws(()=>C.validateFood(food("bad",{purchase:purchase(1,0)})),/采购/);
+});
+
+test("组合套餐按选中配方快照比例合计当前原料价格，半份不会被重复计算", () => {
+  const a=food("a",{price:2}),b=food("b",{price:10});
+  const combo=C.compositeFood("combo","料汁",[{food:a,grams:20},{food:b,grams:10}]);
+  const r=row("combo",combo,{grams:60,fixed:true});
+  assert.ok(Math.abs(C.costs([r]).known-2.8)<1e-9);
+  const currentA={...a,price:3};
+  const edited={...combo,ingredients:[{food:b,grams:999}]};
+  assert.ok(Math.abs(C.costs([r],[currentA,b,edited]).known-3.2)<1e-9);
+  assert.equal(combo.ingredients[0].food.price,2);
+});
+
 test("组合套餐合计原料营养，固定整数份整体参与求解，未知钠保留未知", () => {
   const a = food("sauce-a", { sodium: null });
   const b = food("sauce-b", { kcal: 200, protein: 20, fat: 4, carbs: 20 });

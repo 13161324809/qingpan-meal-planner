@@ -6,7 +6,7 @@
 
 现另含可选字段 `builtinFoodsSeen: string[]`，保存已经初始化过的自带食物编号。`data/foods.json` 是公开随应用发布的系统基础库；初始化只添加未见过的编号，随后个人删除和编辑通过本地完整食物表及此元数据保留，不由重新载入基础库覆盖。完整备份同时保留初始化记录，兼容不含此字段的旧备份。
 
-- Food：`id,name,brand,flavor,category,kcal,protein,fat,carbs,sodium,weightMode,unitGrams,countMode,barcode,price,notes`。营养字段是每100g标示值，`null`代表未知，零与未知严格区分。`price`为每100g实际称重口径的可选单价，当前版本只保存，不作为优化目标。
+- Food：`id,name,brand,flavor,category,kcal,protein,fat,carbs,sodium,weightMode,unitGrams,countMode,barcode,price,notes`。营养字段是每100g标示值，`null`代表未知，零与未知严格区分。`price`为每100g实际称重口径的可选单价，可直接用于费用估算，不作为优化目标。
 - Target：`id,name,kcal,protein,fat,carbs,autoCarbs,sodium,energyTolerance,fatTolerance,carbTolerance`。
 - Row：`id,food,meal,grams,min,max,step,fixed`，其中food为独立快照。
 - Day：以本地日期YYYY-MM-DD为键，`{meals,target,plan:Row[],actual:Row[]}`。plan和actual互不共用对象。
@@ -73,3 +73,9 @@ C中自由条目接近各自范围中点的偏差权重为 `3/max(1,max−min)`�
 为减少零成本食材变量造成的退化搜索，食材变量加入每步单位1e-6的微小用量成本，作为偏好目标的一部分。硬约束和重新核算不变；小型穷举测试的目标值包含该项成本及C方案份量差异项。
 
 全天热量快捷输入按新旧热量比同步缩放蛋白质、脂肪、碳水及其允许克数差额；严格限钠开关与钠上限不随热量缩放。历史条目的餐次元数据仍保留，但今日界面不再要求分餐。
+
+## 费用
+
+Food新增可选purchase：amount、quantity、unit(g/ml/count)、yield(成本净重比例)、density(g/ml)、estimated、note。每100g直接单价price优先，否则按采购金额÷可用净重计算；枚数采购以每个可食重量换算。组合套餐保持已选配方快照的用量比例，递归合计原料当前采购价。缺失价格与换算时返回已知部分和缺失名称。
+
+公开食物包包含价格默认值和香蕉口径更新规则：只补未填写过的价格，不覆盖个人价格或主动清空；原始香蕉数据匹配后迁移到带皮称重参考。采购比例和密度不进入营养或优化模型。

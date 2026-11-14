@@ -19,7 +19,16 @@ globalThis.QingpanBuiltinFoods = {
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图1每100g可食部录入，采用截图标示357kcal；1494kJ为原标示，不再混算。干面煮后吸水，不能用熟面重量套用。"
+      "notes": "按用户截图1每100g可食部录入，采用截图标示357kcal；1494kJ为原标示，不再混算。干面煮后吸水，不能用熟面重量套用。",
+      "purchase": {
+        "amount": 3.99,
+        "quantity": 1000,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
     },
     {
       "id": "photo-20261111-whey",
@@ -35,7 +44,16 @@ globalThis.QingpanBuiltinFoods = {
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图2录入。产品名称及口味被截断，未猜测完整口味；钠显示“--”，保留未知，默认可按热量和三大营养素配餐；仅严格限钠时需补包装钠数据。"
+      "notes": "按用户截图2录入。产品名称及口味被截断，未猜测完整口味；钠显示“--”，保留未知，默认可按热量和三大营养素配餐；仅严格限钠时需补包装钠数据。",
+      "purchase": {
+        "amount": 268,
+        "quantity": 907,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
     },
     {
       "id": "photo-20261111-nuts",
@@ -51,7 +69,16 @@ globalThis.QingpanBuiltinFoods = {
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "用户确认原高蛋白纯纯坚果截图与罐装纯坚果仁为同款，仅保留本条。每100g按包装2803kJ、蛋白质17.8g、脂肪63.1g、碳水5.9g、钠6mg。"
+      "notes": "用户确认原高蛋白纯纯坚果截图与罐装纯坚果仁为同款，仅保留本条。每100g按包装2803kJ、蛋白质17.8g、脂肪63.1g、碳水5.9g、钠6mg。",
+      "purchase": {
+        "amount": 32,
+        "quantity": 400,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
     },
     {
       "id": "photo-20261111-meatballs",
@@ -87,19 +114,34 @@ globalThis.QingpanBuiltinFoods = {
     },
     {
       "id": "reference-usda-09040",
-      "name": "香蕉（去皮，生）",
+      "name": "香蕉（带皮称重，65%可食估算）",
       "brand": "通用参考·USDA",
-      "category": "其他",
-      "kcal": 89,
-      "protein": 1.09,
-      "fat": 0.33,
-      "carbs": 22.84,
-      "sodium": 1,
-      "weightMode": "去皮生重",
+      "category": "水果",
+      "kcal": 57.85,
+      "protein": 0.7085000000000001,
+      "fat": 0.21450000000000002,
+      "carbs": 14.846,
+      "sodium": 0.65,
+      "weightMode": "带皮生重（65%可食估算）",
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "USDA SR28 NDB09040每100g可食部平均参考值；按去皮重量称量。碳水为by difference，含膳食纤维，与部分中国标签口径有差异。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg09.pdf"
+      "notes": "按用户要求，称重输入带皮整根重量；每100g带皮香蕉的营养暂按65g果肉估算。原每100g果肉USDA参考值：89kcal、蛋白质1.09g、脂肪0.33g、碳水22.84g、钠1mg，均乘0.65。价格直接按6元/1000g带皮重量，不再扣皮重。",
+      "purchase": {
+        "amount": 6,
+        "quantity": 1000,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "按带皮购买重量计价；营养按65%可食部分估算。",
+        "weightConversions": [
+          {
+            "weightMode": "去皮生重",
+            "factor": 1.5384615384615383
+          }
+        ]
+      }
     },
     {
       "id": "reference-usda-01123",
@@ -116,7 +158,16 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 50,
       "price": null,
       "notes": "USDA SR28 NDB01123每100g可食部；1个大鸡蛋的默认可食重量50g仅用于按个估算，应按实际大小调整。煎炒所用油另计。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg01.pdf 用户实测7个生鸡蛋带壳共449g，平均带壳64.14g；不用于直接计算可食营养。每个可食50g仍为参考估算，可自行校准。",
-      "countMode": true
+      "countMode": true,
+      "purchase": {
+        "amount": 20.99,
+        "quantity": 30,
+        "unit": "count",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "按枚计价，每个可食50g用于个数换算"
+      }
     },
     {
       "id": "reference-usda-11116",
@@ -132,7 +183,16 @@ globalThis.QingpanBuiltinFoods = {
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "USDA SR28 NDB11116 pak-choi（小白菜/青江菜）参考，不泛指所有油菜品种；烹调油与调味料另计。碳水by difference含纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf"
+      "notes": "USDA SR28 NDB11116 pak-choi（小白菜/青江菜）参考，不泛指所有油菜品种；烹调油与调味料另计。碳水by difference含纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "purchase": {
+        "amount": 2.69,
+        "quantity": 450,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
     },
     {
       "id": "reference-lkk-light-soy",
@@ -180,7 +240,16 @@ globalThis.QingpanBuiltinFoods = {
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "USDA SR28 NDB19335 Sugars, granulated每100g参考值；采用数据库能量387kcal，不强行改成碳水×4。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg19.pdf"
+      "notes": "USDA SR28 NDB19335 Sugars, granulated每100g参考值；采用数据库能量387kcal，不强行改成碳水×4。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg19.pdf",
+      "purchase": {
+        "amount": 4,
+        "quantity": 400,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
     },
     {
       "id": "reference-usda-04044",
@@ -276,7 +345,16 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 1.6,
       "carbs": 2.5,
       "sodium": 551,
-      "notes": "按用户提供的拼多多包装照片，每100g：能量307kJ、蛋白质12.1g、脂肪1.6g、碳水2.5g、钠551mg。能量按307÷4.184换算。名称按用户指定；品牌和具体口味未确认，不推断。不与正大涮肉片合并；按包装标示产品状态称重。"
+      "notes": "按用户提供的拼多多包装照片，每100g：能量307kJ、蛋白质12.1g、脂肪1.6g、碳水2.5g、钠551mg。能量按307÷4.184换算。名称按用户指定；品牌和具体口味未确认，不推断。不与正大涮肉片合并；按包装标示产品状态称重。",
+      "purchase": {
+        "amount": 88.8,
+        "quantity": 5000,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
     },
     {
       "brand": "",
@@ -292,7 +370,16 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 2,
       "carbs": 0.6,
       "sodium": 647,
-      "notes": "按用户提供的抖音商品营养表，每100g：能量344kJ、蛋白质8.7g、脂肪2.0g、碳水0.6g、钠647mg。能量按344÷4.184换算。配料含黑鱼片、水、复合调味料和淀粉；品牌未知，不推断。重量按实际食用的肉重计算。不与原有聚恒创免浆黑鱼片合并。 商品页能量与三大营养素4/9/4折算约55.2kcal不一致，保留344kJ原标示，请以实物包装核对。"
+      "notes": "按用户提供的抖音商品营养表，每100g：能量344kJ、蛋白质8.7g、脂肪2.0g、碳水0.6g、钠647mg。能量按344÷4.184换算。配料含黑鱼片、水、复合调味料和淀粉；品牌未知，不推断。重量按实际食用的肉重计算。不与原有聚恒创免浆黑鱼片合并。 商品页能量与三大营养素4/9/4折算约55.2kcal不一致，保留344kJ原标示，请以实物包装核对。",
+      "purchase": {
+        "amount": 79.9,
+        "quantity": 2500,
+        "unit": "g",
+        "yield": 0.95,
+        "density": null,
+        "estimated": false,
+        "note": "用户报价；2500g×95%=2375g可用鱼肉，仅用于费用换算"
+      }
     },
     {
       "id": "photo-20261112-spicy-chicken-meatballs",
@@ -326,7 +413,16 @@ globalThis.QingpanBuiltinFoods = {
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "weightMode": "包装产品净重"
+      "weightMode": "包装产品净重",
+      "purchase": {
+        "amount": 3.5,
+        "quantity": 800,
+        "unit": "ml",
+        "yield": 1,
+        "density": 1,
+        "estimated": true,
+        "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
+      }
     },
     {
       "id": "photo-20261112-haitian-light-soy-sauce",
@@ -344,7 +440,16 @@ globalThis.QingpanBuiltinFoods = {
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "weightMode": "按克称重（由体积近似换算）"
+      "weightMode": "按克称重（由体积近似换算）",
+      "purchase": {
+        "amount": 3.5,
+        "quantity": 500,
+        "unit": "ml",
+        "yield": 1,
+        "density": 1,
+        "estimated": true,
+        "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
+      }
     },
     {
       "id": "photo-20261112-haitian-oyster-sauce",
@@ -362,7 +467,16 @@ globalThis.QingpanBuiltinFoods = {
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "weightMode": "包装产品净重"
+      "weightMode": "包装产品净重",
+      "purchase": {
+        "amount": 9,
+        "quantity": 1000,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
     },
     {
       "id": "photo-20261112-jinlongyu-cooking-oil",
@@ -380,7 +494,16 @@ globalThis.QingpanBuiltinFoods = {
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "weightMode": "包装产品净重"
+      "weightMode": "包装产品净重",
+      "purchase": {
+        "amount": 10.59,
+        "quantity": 900,
+        "unit": "ml",
+        "yield": 1,
+        "density": 1,
+        "estimated": true,
+        "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
+      }
     },
     {
       "id": "photo-20261112-haitian-steamed-fish-soy-sauce",
@@ -398,7 +521,16 @@ globalThis.QingpanBuiltinFoods = {
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "weightMode": "按克称重（由体积近似换算）"
+      "weightMode": "按克称重（由体积近似换算）",
+      "purchase": {
+        "amount": 8,
+        "quantity": 450,
+        "unit": "ml",
+        "yield": 1,
+        "density": 1,
+        "estimated": true,
+        "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
+      }
     },
     {
       "id": "photo-20261112-pitted-grey-dates",
@@ -433,7 +565,168 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "barcode": "",
-      "notes": "按用户2026-11-13包装照片每100g录入：能量786kJ、蛋白质3.2g、脂肪12.5g、碳水15.8g、钠5114mg。生产商：成都市味百度食品有限公司；品牌未完整显示，条码被截断，均不猜测。按实际使用的调料克数计算。"
+      "notes": "按用户2026-11-13包装照片每100g录入：能量786kJ、蛋白质3.2g、脂肪12.5g、碳水15.8g、钠5114mg。生产商：成都市味百度食品有限公司；品牌未完整显示，条码被截断，均不猜测。按实际使用的调料克数计算。",
+      "purchase": {
+        "amount": 22,
+        "quantity": 450,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "用户确认酸汤肥牛味、浓香番茄味同品牌同价：22元/450g。"
+      }
+    },
+    {
+      "id": "reference-usda-11291",
+      "name": "葱（生，通用参考）",
+      "brand": "通用参考·USDA",
+      "category": "调味品",
+      "flavor": "",
+      "kcal": 32,
+      "protein": 1.83,
+      "fat": 0.19,
+      "carbs": 7.34,
+      "sodium": 16,
+      "weightMode": "处理后实际食用生重",
+      "unitGrams": null,
+      "price": null,
+      "barcode": "",
+      "notes": "USDA SR28 NDB11291，小葱/青葱（葱白和葱叶）生鲜可食部分通用参考，不适用于洋葱。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "purchase": {
+        "amount": 2,
+        "quantity": 500,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "按用户提供的价格；按实际使用克数估算。"
+      }
+    },
+    {
+      "id": "reference-usda-11216",
+      "name": "姜（生，通用参考）",
+      "brand": "通用参考·USDA",
+      "category": "调味品",
+      "flavor": "",
+      "kcal": 80,
+      "protein": 1.82,
+      "fat": 0.75,
+      "carbs": 17.77,
+      "sodium": 13,
+      "weightMode": "处理后实际食用生重",
+      "unitGrams": null,
+      "price": null,
+      "barcode": "",
+      "notes": "USDA SR28 NDB11216，生姜可食部分参考。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "purchase": {
+        "amount": 3,
+        "quantity": 500,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "按用户提供的价格；按实际使用克数估算。"
+      }
+    },
+    {
+      "id": "reference-usda-11819",
+      "name": "小米辣（鲜，红辣椒参考）",
+      "brand": "通用参考·USDA",
+      "category": "调味品",
+      "flavor": "",
+      "kcal": 40,
+      "protein": 1.87,
+      "fat": 0.44,
+      "carbs": 8.81,
+      "sodium": 9,
+      "weightMode": "处理后实际食用生重",
+      "unitGrams": null,
+      "price": null,
+      "barcode": "",
+      "notes": "USDA SR28 NDB11819，鲜红辣椒可食部分参考，暂用于小米辣估算，非小米辣专属品种检测值。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "purchase": {
+        "amount": 2,
+        "quantity": 100,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "按用户提供的价格；按实际使用克数估算。"
+      }
+    }
+  ],
+  "priceDefaults": [
+    {
+      "names": [
+        "葱",
+        "小葱",
+        "香葱",
+        "大葱"
+      ],
+      "purchase": {
+        "amount": 2,
+        "quantity": 500,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
+    },
+    {
+      "names": [
+        "姜",
+        "生姜"
+      ],
+      "purchase": {
+        "amount": 3,
+        "quantity": 500,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": ""
+      }
+    },
+    {
+      "names": [
+        "酸汤肥牛味面调料",
+        "浓香番茄味面调料"
+      ],
+      "purchase": {
+        "amount": 22,
+        "quantity": 450,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "用户确认酸汤肥牛味、浓香番茄味同品牌同价：22元/450g。"
+      }
+    }
+  ],
+  "foodUpdates": [
+    {
+      "id": "reference-usda-09040",
+      "from": {
+        "name": "香蕉（去皮，生）",
+        "weightMode": "去皮生重",
+        "kcal": 89,
+        "protein": 1.09,
+        "fat": 0.33,
+        "carbs": 22.84,
+        "sodium": 1
+      },
+      "to": {
+        "name": "香蕉（带皮称重，65%可食估算）",
+        "category": "水果",
+        "weightMode": "带皮生重（65%可食估算）",
+        "kcal": 57.85,
+        "protein": 0.7085000000000001,
+        "fat": 0.21450000000000002,
+        "carbs": 14.846,
+        "sodium": 0.65,
+        "notes": "按用户要求，称重输入带皮整根重量；每100g带皮香蕉的营养暂按65g果肉估算。原每100g果肉USDA参考值：89kcal、蛋白质1.09g、脂肪0.33g、碳水22.84g、钠1mg，均乘0.65。价格直接按6元/1000g带皮重量，不再扣皮重。"
+      }
     }
   ]
 };

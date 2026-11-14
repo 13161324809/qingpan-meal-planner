@@ -120,7 +120,25 @@
         (k) =>
           `${C.labels[k]} ${s.unknown.includes(k) ? "未知" : fmt(s[k])}${k === "kcal" ? " kcal" : k === "sodium" ? " mg" : "g"}`,
       )
-      .join(" · ");
+      .join(" · ") + " · " + costLine(rows);
+  }
+  function purchaseText(f) {
+    if (f.isComposite) return "每份 · " + costLine([{food:f, grams:f.unitGrams}]);
+    if (f.price !== null) return "直接单价 ¥" + f.price + "/100g";
+    const p = f.purchase;
+    if (!p) return f.isComposite ? "费用按配方原料价格合计" : "价格未录入";
+    return "采购 ¥" + p.amount + " / " + p.quantity + ({g:"g", ml:"ml", count:"枚"}[p.unit]) +
+      (p.yield !== null && p.yield !== 1 ? " · 成本净重 " + fmt(p.yield * 100) + "%" : "") +
+      (p.unit === "ml" ? (p.density ? " · " + p.density + "g/ml" : " · 换算密度待补") : "") +
+      (p.unit === "g" && p.yield === null ? " · 成本净重比例待补" : "") + (p.estimated ? " · 估算" : "");
+  }
+  function costLine(rows) {
+    const cost = C.costs(rows, state.foods);
+    return `${cost.complete ? "预计费用" : "已知费用"} ¥${cost.known.toFixed(2)}${cost.unknown.length ? "（待补价格/换算：" + cost.unknown.join("、") + "）" : ""}${cost.estimated.length ? "（含估算系数）" : ""}`;
+  }
+  function costSummary(rows) {
+    const cost = C.costs(rows, state.foods);
+    return `<hr><div class="cost-summary"><strong>${esc(costLine(rows))}</strong><p class="hint">按当前食物库采购价估算${cost.complete ? "" : "，仅合计已有完整价格的数据"}。${cost.estimated.length ? "估算换算：" + esc(cost.estimated.join("、")) + "。" : ""}组合套餐按配方用量合计费用。</p></div>`;
   }
   function summary(rows, t) {
     const s = C.totals(rows),
@@ -138,7 +156,7 @@
       })
       .join(
         "",
-      )}<hr><div class="macro-caption">允许热量偏差 ±${t.energyTolerance}% · 脂肪 ±${t.fatTolerance}g · 碳水 ±${t.carbTolerance}g<br>蛋白质以目标为下限。营养值按食物标签核算。</div><button class="text-button" data-action="go-settings">调整目标 ↗</button></section>`;
+      )}<hr><div class="macro-caption">允许热量偏差 ±${t.energyTolerance}% · 脂肪 ±${t.fatTolerance}g · 碳水 ±${t.carbTolerance}g<br>蛋白质以目标为下限。营养值按食物标签核算。</div><button class="text-button" data-action="go-settings">调整目标 ↗</button>${costSummary(rows)}</section>`;
   }
   function issuesBox(rows, t) {
     if (!rows.length) return "";
@@ -158,14 +176,44 @@
       sodiumNote
     );
   }
+  const sortFields = {default:"默认顺序", kcal:"热量", protein:"蛋白质", price:"费用", fat:"脂肪", carbs:"碳水"};
+  function mealSort() {
+    const saved = state.mealSort || {};
+    return {field:Object.hasOwn(sortFields, saved.field) ? saved.field : "default", direction:saved.direction === "asc" ? "asc" : "desc"};
+  }
+  function rowSortValue(row, field) {
+    if (field === "price") {
+      const value = C.costs([row], state.foods);
+      return value.complete ? value.known : null;
+    }
+    const value = C.totals([row]);
+    return value.unknown.includes(field) ? null : value[field];
+  }
+  function sortRows(rows) {
+    const {field, direction} = mealSort();
+    if (field === "default") return rows;
+    return rows.map(row => ({row, value:rowSortValue(row, field)})).sort((a,b) => {
+      if (a.value === null) return b.value === null ? 0 : 1;
+      if (b.value === null) return -1;
+      return (a.value-b.value) * (direction === "asc" ? 1 : -1);
+    }).map(item => item.row);
+  }
+  function mealSortControls() {
+    const sort = mealSort();
+    return '<div class="food-sort"><label>配餐排序<select id="meal-sort-field" aria-label="配餐排序依据">' +
+      Object.entries(sortFields).map(([value,label]) => '<option value="'+value+'" '+(value===sort.field?'selected':'')+'>'+label+'</option>').join('') +
+      '</select></label><label>顺序<select id="meal-sort-direction" aria-label="配餐排序顺序" '+(sort.field==='default'?'disabled':'')+'><option value="desc" '+(sort.direction==='desc'?'selected':'')+'>从高到低</option><option value="asc" '+(sort.direction==='asc'?'selected':'')+'>从低到高</option></select></label><small>按每项实际克数／个数／份数的营养和费用比较，未知值排最后</small></div>';
+  }
+  function rowSortCaption(row) {
+    const {field} = mealSort();
+    if (field === "default") return "";
+    const value = rowSortValue(row, field);
+    const text = value === null ? "未知（排最后）" : field === "price" ? "¥" + value.toFixed(2) : fmt(value) + (field === "kcal" ? " kcal" : "g");
+    return '<div class="food-meta sort-value">本项'+sortFields[field]+'：'+text+'</div>';
+  }
   function filteredFoods() {
-    return state.foods.filter(
-      (f) =>
-        (category === "全部" || f.category === category) &&
-        `${f.name} ${f.brand} ${f.flavor} ${f.barcode || ""}`
-          .toLowerCase()
-          .includes(search.toLowerCase()),
-    );
+    return state.foods.filter(f => (category === "全部" || f.category === category) &&
+      (f.name+' '+f.brand+' '+f.flavor+' '+(f.barcode || '')).toLowerCase().includes(search.toLowerCase()));
   }
   function foodCategories() {
     return [...new Set([...categories, ...state.foods.map((f) => f.category).filter(Boolean)])];
@@ -187,7 +235,7 @@
         .filter((f) => !day().plan.some((r) => productId(r.food.id) === productId(f.id)))
         .map(
           (f) =>
-            `<div class="pick-item"><div><div class="food-name">${esc(f.name)} <small>${esc(f.brand)}</small></div><div class="food-meta">${f.kcal === null ? "能量未知" : fmt(f.kcal) + " kcal /100g营养标示"} · ${esc(f.weightMode)}</div></div><button data-action="add-food" data-id="${esc(f.id)}">＋ 选用</button></div>`,
+            `<div class="pick-item"><div><div class="food-name">${esc(f.name)} <small>${esc(f.brand)}</small></div><div class="food-meta">${f.kcal === null ? "能量未知" : fmt(f.kcal) + " kcal /100g营养标示"} · ${esc(f.weightMode)}</div>${f.isComposite ? `<div class="food-meta combo-cost">${esc(purchaseText(f))}</div>` : ""}</div><button data-action="add-food" data-id="${esc(f.id)}">＋ 选用</button></div>`,
         )
         .join("") ||
       empty(
@@ -224,8 +272,8 @@
     const d = day();
     return ["全天"]
       .map((m) => {
-        const rs = rows;
-        return `<div class="meal-head"><strong>${esc(m)} <small> / ${rs.length} 种食物</small></strong><small>${fmt(C.totals(rs).kcal)} kcal${C.totals(rs).unknown.length ? " · 数据不全" : ""}</small></div>${rs.map((r) => `<div class="row-card all-day"><div><div class="food-name">${esc(r.food.name)}</div><div class="food-meta">${esc(r.food.weightMode)}</div>${r.food.unitGrams && !C.counted(r.food) ? `<div class="row-unit">≈ ${fmt(r.grams / r.food.unitGrams)} 个／份 <button class="text-button" data-action="unit" data-id="${esc(r.id)}" data-actual="${actual}">按个输入</button></div>` : ""}</div><div class="row-weight">${C.counted(r.food) ? countControls(r, actual) : `<input aria-label="${esc(r.food.name)}克数" type="number" min="0" max="10000" step="any" value="${r.grams}" data-row="${esc(r.id)}" data-field="grams" data-actual="${actual}">`}</div><button class="icon-button" aria-label="移除${esc(r.food.name)}" data-action="remove-row" data-id="${esc(r.id)}" data-actual="${actual}">×</button>${actual ? "" : C.counted(r.food) ? countRange(r) : `<div class="constraints"><label>范围 <input aria-label="最小克数" type="number" min="0" max="10000" value="${r.min}" data-row="${esc(r.id)}" data-field="min">—<input aria-label="最大克数" type="number" min="0" max="10000" value="${r.max}" data-row="${esc(r.id)}" data-field="max"> g</label><label>步长 <select data-row="${esc(r.id)}" data-field="step" aria-label="取整单位">${[1, 5, 10].map((x) => `<option ${x === r.step ? "selected" : ""} value="${x}">${x}g</option>`).join("")}</select></label><label class="fixed"><input type="checkbox" ${r.fixed ? "checked" : ""} data-row="${esc(r.id)}" data-field="fixed"> 固定重量</label></div>`}</div>`).join("")}${rs.length ? `<div class="nutrition-line">${nutritionLine(rs)}</div>` : '<p class="section-note">这一餐还未添加食物</p>'}`;
+        const rs = sortRows(rows);
+        return `<div class="meal-head"><strong>${esc(m)} <small> / ${rs.length} 种食物</small></strong><small>${fmt(C.totals(rs).kcal)} kcal${C.totals(rs).unknown.length ? " · 数据不全" : ""}</small></div>${rs.length ? mealSortControls() : ""}${rs.map((r) => `<div class="row-card all-day"><div><div class="food-name">${esc(r.food.name)}</div><div class="food-meta">${esc(r.food.weightMode)}</div>${rowSortCaption(r)}<div class="food-meta">${esc(costLine([r]))}</div>${r.food.unitGrams && !C.counted(r.food) ? `<div class="row-unit">≈ ${fmt(r.grams / r.food.unitGrams)} 个／份 <button class="text-button" data-action="unit" data-id="${esc(r.id)}" data-actual="${actual}">按个输入</button></div>` : ""}</div><div class="row-weight">${C.counted(r.food) ? countControls(r, actual) : `<input aria-label="${esc(r.food.name)}克数" type="number" min="0" max="10000" step="any" value="${r.grams}" data-row="${esc(r.id)}" data-field="grams" data-actual="${actual}">`}</div><button class="icon-button" aria-label="移除${esc(r.food.name)}" data-action="remove-row" data-id="${esc(r.id)}" data-actual="${actual}">×</button>${actual ? "" : C.counted(r.food) ? countRange(r) : `<div class="constraints"><label>范围 <input aria-label="最小克数" type="number" min="0" max="10000" value="${r.min}" data-row="${esc(r.id)}" data-field="min">—<input aria-label="最大克数" type="number" min="0" max="10000" value="${r.max}" data-row="${esc(r.id)}" data-field="max"> g</label><label>步长 <select data-row="${esc(r.id)}" data-field="step" aria-label="取整单位">${[1, 5, 10].map((x) => `<option ${x === r.step ? "selected" : ""} value="${x}">${x}g</option>`).join("")}</select></label><label class="fixed"><input type="checkbox" ${r.fixed ? "checked" : ""} data-row="${esc(r.id)}" data-field="fixed"> 固定重量</label></div>`}</div>`).join("")}${rs.length ? `<div class="nutrition-line">${nutritionLine(rs)}</div>` : '<p class="section-note">这一餐还未添加食物</p>'}`;
       })
       .join("");
   }
@@ -243,7 +291,7 @@
   function foodTable() {
     const fs = filteredFoods();
     return fs.length
-      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div>${f.barcode ? `<small>条码 ${esc(f.barcode)}</small>` : ""}<div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}</div>${f.notes ? `<div class="food-notes">${esc(f.notes)}</div>` : ""}</td>${C.keys.map((k) => `<td>${f[k] === null ? (k === "sodium" ? '<span class="badge">未提供（选填）</span>' : '<span class="badge warn">待补全</span>') : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
+      ? `<table class="library-table"><thead><tr><th>食物 / 称重口径</th><th>热量 kcal</th><th>蛋白质 g</th><th>脂肪 g</th><th>碳水 g</th><th>钠 mg</th><th>操作</th></tr></thead><tbody>${fs.map((f) => `<tr><td><div class="food-name">${esc(f.name)}</div>${f.barcode ? `<small>条码 ${esc(f.barcode)}</small>` : ""}<div class="food-meta">${esc([f.brand, f.flavor, f.category, f.weightMode].filter(Boolean).join(" · "))}</div><div class="food-meta">${esc(purchaseText(f))}</div>${f.notes ? `<div class="food-notes">${esc(f.notes)}</div>` : ""}</td>${C.keys.map((k) => `<td>${f[k] === null ? (k === "sodium" ? '<span class="badge">未提供（选填）</span>' : '<span class="badge warn">待补全</span>') : fmt(f[k])}</td>`).join("")}<td><button class="text-button" data-action="edit-food" data-id="${esc(f.id)}">编辑</button><button class="text-button" data-action="delete-food" data-id="${esc(f.id)}">删除</button></td></tr>`).join("")}</tbody></table>`
       : empty(
           "建立自己的食物库",
           "营养数据由你录入，可长期重复使用。",
@@ -389,6 +437,11 @@
       form.elements.energy.value = f.kcal ?? "";
     }
     form.elements.countMode.checked = f ? C.counted(f) : false;
+    const p = f?.purchase;
+    for (const [field, key] of Object.entries({purchaseAmount:"amount", purchaseQuantity:"quantity", purchaseUnit:"unit", purchaseDensity:"density", purchaseNote:"note"}))
+      form.elements[field].value = p?.[key] ?? (field === "purchaseUnit" ? "g" : "");
+    form.elements.purchaseYield.value = p ? (p.yield === null ? "" : p.yield * 100) : 100;
+    form.elements.purchaseEstimated.checked = p?.estimated === true;
     $("#food-dialog").showModal();
   }
   function naming(title, initial, fn) {
@@ -764,7 +817,13 @@
   document.addEventListener("change", (e) =>
     guarded(() => {
       const el = e.target;
-      if (el.id === "quick-kcal") {
+      if (el.id === "meal-sort-field" || el.id === "meal-sort-direction") {
+        const sort = mealSort();
+        if (el.id === "meal-sort-field" && Object.hasOwn(sortFields, el.value)) sort.field = el.value;
+        if (el.id === "meal-sort-direction") sort.direction = el.value === "asc" ? "asc" : "desc";
+        state.mealSort = sort;
+        persist(); render();
+      } else if (el.id === "quick-kcal") {
         if (el.value.trim() && el.checkValidity()) {
           day().target = C.scaleTargetCalories(day().target, Number(el.value));
           invalidate();
@@ -855,6 +914,7 @@
       const text = (k) => String(fd.get(k) || "").trim(),
         num = (k) => (text(k) === "" ? null : Number(text(k)));
       const f = {
+        ...(state.foods.find(food => food.id === text("id")) || {}),
         id: text("id") || uid(),
         name: text("name"),
         category: text("category"),
@@ -875,6 +935,12 @@
         weightMode: text("weightMode"),
         unitGrams: num("unitGrams"),
         price: num("price"),
+        purchase: num("purchaseAmount") === null ? null : {
+          ...(state.foods.find(food => food.id === text("id"))?.purchase || {}),
+          amount: num("purchaseAmount"), quantity: num("purchaseQuantity"), unit: text("purchaseUnit"),
+          yield: num("purchaseYield") === null ? null : num("purchaseYield") / 100,
+          density: num("purchaseDensity"), estimated: form.elements.purchaseEstimated.checked, note: text("purchaseNote")
+        },
         notes: text("notes"),
       };
       C.validateFood(f);

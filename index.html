@@ -134,8 +134,16 @@
               placeholder="选填，用于按个换算"
           /></label>
           <label><span>按整数个计量</span><input type="checkbox" name="countMode" />按个增减，自动配餐也使用整数个</label>
+          <div class="form-section">费用估算 <small>采购规格与换算系数只影响费用，不改变营养计算。</small></div>
+          <label>采购总价 元<input name="purchaseAmount" type="number" min="0" step="any" placeholder="选填，例如79.9"></label>
+          <label>购买数量<input name="purchaseQuantity" type="number" min="0.001" step="any" placeholder="例如2500"></label>
+          <label>采购单位<select name="purchaseUnit"><option value="g">克 g</option><option value="ml">毫升 ml</option><option value="count">个／枚</option></select></label>
+          <label>成本净重比例 %<input name="purchaseYield" type="number" min="0.01" max="100" step="any" value="100" placeholder="未知留空"></label>
+          <label>成本换算密度 g/ml<input name="purchaseDensity" type="number" min="0.001" step="any" placeholder="ml计价需要填写，未知留空"></label>
+          <label><span>使用估算系数</span><input name="purchaseEstimated" type="checkbox">在费用旁标明估算</label>
+          <label>价格说明<input name="purchaseNote" maxlength="300" placeholder="采购平台、日期、估算依据等"></label>
           <label
-            >每100g称重单价 元<input
+            >直接单价 元/100g（选填，优先使用）<input
               name="price"
               type="number"
               min="0"

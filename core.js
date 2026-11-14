@@ -28,7 +28,6 @@
     const sum = totals(rows);
     const ingredients = rows.map(r => {
       const food = clone(r.food);
-      delete food.ingredients;
       return { food, grams: r.grams };
     });
     const food = {
@@ -59,6 +58,15 @@
     if (f.unitGrams !== null && (!number(f.unitGrams) || f.unitGrams <= 0))
       throw Error("每个重量必须大于0");
     if (f.price !== null && !nonneg(f.price)) throw Error("单价无效");
+    if (f.purchase !== undefined && f.purchase !== null) {
+      const p = f.purchase;
+      if (!nonneg(p.amount) || !number(p.quantity) || p.quantity <= 0 ||
+          !["g", "ml", "count"].includes(p.unit)) throw Error("采购价格、规格或单位无效");
+      if (p.yield !== null && (!number(p.yield) || p.yield <= 0 || p.yield > 1)) throw Error("成本净重比例须大于0且不超过100%");
+      if (p.density !== null && (!number(p.density) || p.density <= 0)) throw Error("成本密度须大于0或留空");
+      if (p.weightConversions !== undefined && (!Array.isArray(p.weightConversions) || p.weightConversions.length > 10 || p.weightConversions.some(c => !c || typeof c.weightMode !== "string" || !number(c.factor) || c.factor <= 0)))
+        throw Error("历史称重成本换算无效");
+    }
     if (f.barcode !== undefined && f.barcode !== "" &&
         (typeof f.barcode !== "string" || !/^\d{8,14}$/.test(f.barcode)))
       throw Error("条码请输入8至14位数字，或留空");
@@ -125,6 +133,17 @@
     const seen = new Set(state.builtinFoodsSeen || []);
     const unseen = pack.foods.filter((f) => !seen.has(f.id));
     const result = mergeFoodPack(state, { ...pack, foods: unseen });
+    for (const update of pack.foodUpdates || []) {
+      const food = result.state.foods.find(f => f.id === update.id);
+      if (food && Object.entries(update.from).every(([key,value]) => food[key] === value))
+        Object.assign(food, clone(update.to));
+    }
+    const priceDefaults = [...pack.foods.filter(f => f.purchase).map(f => ({id:f.id, purchase:f.purchase})), ...(pack.priceDefaults || [])];
+    for (const food of result.state.foods) {
+      if (food.purchase !== undefined || food.price !== null) continue;
+      const match = priceDefaults.find(p => p.id === food.id || p.names?.includes(food.name));
+      if (match) food.purchase = clone(match.purchase);
+    }
     result.state.builtinFoodsSeen = [
       ...new Set([...seen, ...pack.foods.map((f) => f.id)]),
     ];
@@ -145,6 +164,40 @@
       }
     }
     return out;
+  }
+  function costs(rows, foods = []) {
+    const library = new Map(foods.map(f => [f.id, f]));
+    const unknown = new Set(), estimated = new Set();
+    function cost(snapshot, grams, ancestors = new Set()) {
+      if (!grams) return 0;
+      const food = library.get(snapshot.id) || snapshot;
+      if (nonneg(food.price)) return grams * food.price / 100;
+      const p = food.purchase;
+      if (p) {
+        const conversion = p.weightConversions?.find(c => c.weightMode === snapshot.weightMode);
+        const billedGrams = grams * (conversion?.factor || 1);
+        let weight;
+        if (p.unit === "count") weight = p.quantity * (snapshot.unitGrams || food.unitGrams);
+        else if (p.unit === "ml") weight = p.density && p.yield ? p.quantity * p.density * p.yield : null;
+        else weight = p.yield ? p.quantity * p.yield : null;
+        if (number(weight) && weight > 0) {
+          if (p.estimated) estimated.add(food.name);
+          return billedGrams * p.amount / weight;
+        }
+      }
+      // Keep the selected recipe proportions; use current ingredient prices.
+      if (snapshot.isComposite && snapshot.ingredients?.length && snapshot.unitGrams > 0 && !ancestors.has(snapshot.id) && ancestors.size < 10) {
+        if (!Array.isArray(snapshot.ingredients) || snapshot.ingredients.length > 60 || snapshot.ingredients.some(r => !r?.food || !nonneg(r.grams))) {
+          unknown.add(food.name); return 0;
+        }
+        const next = new Set(ancestors); next.add(snapshot.id);
+        return snapshot.ingredients.reduce((sum, r) => sum + cost(r.food, r.grams * grams / snapshot.unitGrams, next), 0);
+      }
+      unknown.add(food.name);
+      return 0;
+    }
+    const known = rows.reduce((sum, r) => sum + cost(r.food, r.grams), 0);
+    return {known, unknown:[...unknown], estimated:[...estimated], complete:unknown.size === 0};
   }
   function targetBounds(t) {
     if (!t || typeof t.autoCarbs !== "boolean") throw Error("自动碳水设置无效");
@@ -588,6 +641,7 @@
     portionStep,
     compositeFood,
     totals,
+    costs,
     targetBounds,
     validateRows,
     violations,

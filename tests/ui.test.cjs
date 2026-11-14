@@ -640,3 +640,92 @@ test("DOM：已保存的套餐可直接转换为整体，转换不改动原套�
     assert.equal(Object.values(t.state().days)[0].plan.length,1);
   } finally {t.close();}
 });
+
+test("DOM：旧计划即时估费，采购价可编辑且刷新不被默认价覆盖", options, async () => {
+  const t=setup(undefined,true);
+  try {
+    click(t,'[data-action="add-food"][data-id="reference-usda-01123"]');
+    assert.match(t.$('.cost-summary').textContent,/0.70/);
+    click(t,'[data-action="count-plus"]');
+    assert.match(t.$('.cost-summary').textContent,/1.40/);
+    const before=Object.values(t.state().days)[0].plan[0].food.kcal;
+    await route(t,'foods');
+    click(t,'[data-action="edit-food"][data-id="reference-usda-01123"]');
+    const form=t.$('#food-form');
+    assert.equal(form.elements.purchaseAmount.value,'20.99');
+    assert.equal(form.elements.purchaseUnit.value,'count');
+    form.elements.purchaseAmount.value='30';
+    submit(t,'#food-form');
+    await route(t,'today');
+    assert.match(t.$('.cost-summary').textContent,/2.00/);
+    assert.equal(Object.values(t.state().days)[0].plan[0].food.kcal,before);
+    const restored=setup(t.state(),true);
+    try { assert.equal(restored.state().foods.find(f=>f.id==='reference-usda-01123').purchase.amount,30); }
+    finally {restored.close();}
+  }finally{t.close();}
+});
+
+test("DOM：已有吃鱼料汁按原料当前价格显示每份费用，整份增减计入全天", options, async () => {
+  const state=fixture();
+  const ingredient=C.clone(state.foods[0]);
+  ingredient.price=null;
+  const combo=C.compositeFood('saved-fish-sauce','吃鱼料汁',[{food:ingredient,grams:50}]);
+  state.foods[0].price=2;
+  state.foods.push(combo);
+  const t=setup(state);
+  try{
+    assert.match(t.$('.combo-cost').textContent,/每份.*1.00/);
+    click(t,'[data-action="add-food"][data-id="saved-fish-sauce"]');
+    assert.match(t.$('.cost-summary').textContent,/1.00/);
+    click(t,'[data-action="count-plus"]');
+    assert.match(t.$('.cost-summary').textContent,/2.00/);
+    const row=Object.values(t.state().days)[0].plan[0];
+    assert.equal(row.fixed,true);
+    assert.equal(row.food.ingredients[0].food.price,null);
+    await route(t,'foods');
+    const libraryRow=t.all('tbody tr').find(r=>r.textContent.includes('吃鱼料汁'));
+    assert.match(libraryRow.textContent,/每份.*1.00/);
+  }finally{t.close();}
+});
+
+test("DOM：排序作用于配餐实际用量，未知末尾，克数变化重新排序且保留计算数据", options, async () => {
+  const state=fixture(),base=state.foods[0];
+  state.foods=[
+    {...base,id:'sort-a',name:'甲',kcal:100,protein:80,fat:10,carbs:20,price:10},
+    {...base,id:'sort-b',name:'乙',kcal:20,protein:3,fat:5,carbs:4,price:0},
+    {...base,id:'sort-c',name:'丙',kcal:null,protein:null,fat:null,carbs:null,price:null}
+  ];
+  const t=setup(state);
+  const order=()=>t.all('.row-card .food-name').map(e=>e.textContent).join(',');
+  try{
+    assert.equal(t.$('#meal-sort-field'),null);
+    assert.equal(t.$('#food-sort-field'),null);
+    for(const id of ['sort-a','sort-b','sort-c'])click(t,'[data-action="add-food"][data-id="'+id+'"]');
+    change(t,'[aria-label="甲克数"]','10');
+    const plan=JSON.stringify(Object.values(t.state().days)[0].plan);
+    change(t,'#meal-sort-field','kcal');
+    assert.equal(order(),'乙,甲,丙');
+    assert.match(t.all('.sort-value')[0].textContent,/20 kcal/);
+    change(t,'#meal-sort-direction','asc');
+    assert.equal(order(),'甲,乙,丙');
+    change(t,'#meal-sort-field','price');
+    assert.equal(order(),'乙,甲,丙');
+    change(t,'#meal-sort-direction','desc');
+    assert.equal(order(),'甲,乙,丙');
+    change(t,'#meal-sort-field','protein');
+    assert.equal(order(),'甲,乙,丙');
+    change(t,'#meal-sort-field','fat');
+    assert.equal(order(),'乙,甲,丙');
+    change(t,'#meal-sort-field','carbs');
+    assert.equal(order(),'乙,甲,丙');
+    assert.equal(JSON.stringify(Object.values(t.state().days)[0].plan),plan);
+    change(t,'[aria-label="甲克数"]','100');
+    assert.equal(order(),'甲,乙,丙');
+    const restored=setup(t.state());
+    try{assert.equal(restored.$('#meal-sort-field').value,'carbs'); assert.equal(restored.$('#meal-sort-direction').value,'desc');}
+    finally{restored.close();}
+    await route(t,'foods');
+    assert.equal(t.$('#meal-sort-field'),null);
+    assert.equal(t.$('#food-sort-field'),null);
+  }finally{t.close();}
+});

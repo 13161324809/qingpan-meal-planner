@@ -7,6 +7,38 @@ const catalog = JSON.parse(
   fs.readFileSync(require.resolve("../data/foods.json"), "utf8"),
 );
 
+test("香蕉按65%果肉折算为带皮称重，旧快照仍按原口径核算费用，鸡胸肉价格对应正确", () => {
+  const update=catalog.foodUpdates.find(u=>u.id==='reference-usda-09040');
+  const banana=catalog.foods.find(f=>f.id===update.id);
+  const old={...banana,...update.from}; delete old.purchase;
+  const state=C.initialState(); state.foods=[old];
+  const migrated=C.installBuiltinFoods(state,catalog).state.foods.find(f=>f.id===old.id);
+  assert.ok(migrated.name.includes('带皮'));
+  assert.ok(Math.abs(migrated.kcal-89*.65)<1e-9);
+  assert.ok(Math.abs(C.costs([{food:migrated,grams:1000}]).known-6)<1e-9);
+  assert.ok(Math.abs(C.costs([{food:old,grams:650}],[migrated]).known-6)<1e-9);
+  assert.equal(old.kcal,89);
+  assert.equal(catalog.foods.find(f=>f.id==='photo-20261111-chicken-pinduoduo').purchase.amount,88.8);
+  assert.equal(catalog.foods.find(f=>f.id==='photo-20261111-cp-shuanrou').purchase,undefined);
+});
+
+test("旧食物库补入采购价，个人价格与主动清空保留，葱姜按名称补价", () => {
+  const state=C.installBuiltinFoods(C.initialState(),catalog).state;
+  const priced=state.foods.find(f=>f.purchase);
+  const id=priced.id;
+  delete priced.purchase;
+  const installed=C.installBuiltinFoods(state,catalog);
+  assert.ok(installed.state.foods.find(f=>f.id===id).purchase);
+  assert.equal(installed.changed,true);
+  priced.price=999;
+  assert.equal(C.installBuiltinFoods(state,catalog).state.foods.find(f=>f.id===id).purchase,undefined);
+  priced.price=null; priced.purchase=null;
+  assert.equal(C.installBuiltinFoods(state,catalog).state.foods.find(f=>f.id===id).purchase,null);
+  const personal={...state.foods[0],id:"personal-spring-onion",name:"葱",price:null};
+  delete personal.purchase; state.foods.push(personal);
+  assert.equal(C.installBuiltinFoods(state,catalog).state.foods.find(f=>f.id===personal.id).purchase.amount,2);
+});
+
 test("用户确认的两个坚果迁移为一条，历史营养快照保持原样", () => {
   const state = C.installBuiltinFoods(C.initialState(), catalog).state;
   const nut = state.foods.find(f => f.id === "photo-20261111-nuts");
