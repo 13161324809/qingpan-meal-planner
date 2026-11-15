@@ -748,8 +748,17 @@
       "edibleRatio": 1,
       "nutritionBasis": "edible",
       "unitGrams": 130,
-      "price": null,
-      "notes": "按用户2026-11-15商品详情截图录入：每100g能量462kJ、蛋白质16.4g、脂肪2.6g、碳水5.1g、钠522mg；每根130g。商品页面数据，实物标签请核对。膳食纤维未标注，保持未知；不将未知记为0。"
+      "price": 3.076923076923077,
+      "notes": "按用户2026-11-15商品详情截图录入：每100g能量462kJ、蛋白质16.4g、脂肪2.6g、碳水5.1g、钠522mg；每根130g。商品页面数据，实物标签请核对。膳食纤维未标注，保持未知；不将未知记为0。",
+      "purchase": {
+        "amount": 20,
+        "quantity": 650,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "用户提供购买价：20元/650g，约5根×130g。"
+      }
     }
   ],
   "priceDefaults": [
