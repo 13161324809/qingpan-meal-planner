@@ -19,7 +19,7 @@ globalThis.QingpanBuiltinFoods = {
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图1每100g可食部录入，采用截图标示357kcal；1494kJ为原标示，不再混算。干面煮后吸水，不能用熟面重量套用。",
+      "notes": "按用户截图1每100g可食部录入，采用截图标示357kcal；1494kJ为原标示，不再混算。干面煮后吸水，不能用熟面重量套用。 膳食纤维：包装未标注；普通精制挂面不溶性纤维参考约0.9～1.6g/100g，暂以1.5g/100g作为配餐估算占位值，不代表本品总膳食纤维实测含量；总纤维可能更高，避免误认精确值。",
       "purchase": {
         "amount": 3.99,
         "quantity": 1000,
@@ -29,8 +29,8 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": false,
         "note": ""
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 1.5,
+      "fiberSource": "普通精制挂面参考估算（非本品实测；不溶性纤维参考范围0.9～1.6g/100g）"
     },
     {
       "id": "photo-20261111-whey",
