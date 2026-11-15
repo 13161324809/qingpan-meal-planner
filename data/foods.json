@@ -27,7 +27,9 @@
         "density": null,
         "estimated": false,
         "note": ""
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261111-whey",
@@ -52,7 +54,9 @@
         "density": null,
         "estimated": false,
         "note": ""
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261111-nuts",
@@ -68,7 +72,7 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "用户确认原高蛋白纯纯坚果截图与罐装纯坚果仁为同款，仅保留本条。每100g按包装2803kJ、蛋白质17.8g、脂肪63.1g、碳水5.9g、钠6mg。",
+      "notes": "用户确认原高蛋白纯纯坚果截图与罐装纯坚果仁为同款，仅保留本条。每100g按包装2803kJ、蛋白质17.8g、脂肪63.1g、碳水5.9g、钠6mg。 膳食纤维：按此前上传的坚果包装标示：膳食纤维8.2g/100g。",
       "purchase": {
         "amount": 32,
         "quantity": 400,
@@ -77,7 +81,9 @@
         "density": null,
         "estimated": false,
         "note": ""
-      }
+      },
+      "fiber": 8.2,
+      "fiberSource": "包装标示"
     },
     {
       "id": "photo-20261111-meatballs",
@@ -93,7 +99,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图4的自定义食物录入；肉种和品牌未提供，不作推断。称重口径暂记包装产品净重，若原记录另有口径请编辑核对。"
+      "notes": "按用户截图4的自定义食物录入；肉种和品牌未提供，不作推断。称重口径暂记包装产品净重，若原记录另有口径请编辑核对。",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261111-fish",
@@ -109,7 +117,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户截图5每100g可食部录入。重量按实际食用的肉重计算。"
+      "notes": "按用户截图5每100g可食部录入。重量按实际食用的肉重计算。",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "reference-usda-09040",
@@ -125,7 +135,7 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户要求，称重输入带皮整根重量；每100g带皮香蕉的营养暂按65g果肉估算。原每100g果肉USDA参考值：89kcal、蛋白质1.09g、脂肪0.33g、碳水22.84g、钠1mg，均乘0.65。价格直接按6元/1000g带皮重量，不再扣皮重。",
+      "notes": "按用户要求，称重输入带皮整根重量；每100g带皮香蕉的营养暂按65g果肉估算。原每100g果肉USDA参考值：89kcal、蛋白质1.09g、脂肪0.33g、碳水22.84g、钠1mg，均乘0.65。价格直接按6元/1000g带皮重量，不再扣皮重。 膳食纤维：香蕉果肉纤维约2.6g/100g；本条按带皮重量、65%可食率折算为1.69g/100g带皮香蕉。",
       "purchase": {
         "amount": 6,
         "quantity": 1000,
@@ -140,7 +150,9 @@
             "factor": 1.5384615384615383
           }
         ]
-      }
+      },
+      "fiber": 1.69,
+      "fiberSource": "USDA通用参考估算"
     },
     {
       "id": "reference-usda-01123",
@@ -156,7 +168,7 @@
       "flavor": "",
       "unitGrams": 50,
       "price": null,
-      "notes": "USDA SR28 NDB01123每100g可食部；1个大鸡蛋的默认可食重量50g仅用于按个估算，应按实际大小调整。煎炒所用油另计。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg01.pdf 用户实测7个生鸡蛋带壳共449g，平均带壳64.14g；不用于直接计算可食营养。每个可食50g仍为参考估算，可自行校准。",
+      "notes": "USDA SR28 NDB01123每100g可食部；1个大鸡蛋的默认可食重量50g仅用于按个估算，应按实际大小调整。煎炒所用油另计。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg01.pdf 用户实测7个生鸡蛋带壳共449g，平均带壳64.14g；不用于直接计算可食营养。每个可食50g仍为参考估算，可自行校准。 膳食纤维：去壳鸡蛋膳食纤维0g/100g。",
       "countMode": true,
       "purchase": {
         "amount": 20.99,
@@ -166,7 +178,9 @@
         "density": null,
         "estimated": false,
         "note": "按枚计价，每个可食50g用于个数换算"
-      }
+      },
+      "fiber": 0,
+      "fiberSource": "USDA通用参考"
     },
     {
       "id": "reference-usda-11116",
@@ -182,7 +196,7 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "USDA SR28 NDB11116 pak-choi（小白菜/青江菜）参考，不泛指所有油菜品种；烹调油与调味料另计。碳水by difference含纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "notes": "USDA SR28 NDB11116 pak-choi（小白菜/青江菜）参考，不泛指所有油菜品种；烹调油与调味料另计。碳水by difference含纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf 膳食纤维：小油菜/青江菜生重膳食纤维约1.0g/100g，品种有差异。",
       "purchase": {
         "amount": 2.69,
         "quantity": 450,
@@ -191,7 +205,9 @@
         "density": null,
         "estimated": false,
         "note": ""
-      }
+      },
+      "fiber": 1,
+      "fiberSource": "USDA通用参考"
     },
     {
       "id": "reference-lkk-light-soy",
@@ -207,7 +223,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "官方每约5g：4.6kcal、蛋白0.39g、碳水0.7g、盐0.86g，按×20归一。钠=盐÷2.5；脂肪标为<0.1g/份，保留未知不当作0。非用户实际瓶装标签。来源：https://uk.lkk.com/products/premium-light-soy-sauce"
+      "notes": "官方每约5g：4.6kcal、蛋白0.39g、碳水0.7g、盐0.86g，按×20归一。钠=盐÷2.5；脂肪标为<0.1g/份，保留未知不当作0。非用户实际瓶装标签。来源：https://uk.lkk.com/products/premium-light-soy-sauce",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "reference-lkk-oyster",
@@ -223,7 +241,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "官方每约15g：20kcal、蛋白0.2g、碳水4.7g、盐1.7g；换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。实际品牌与批次请核对。来源：https://uk.lkk.com/products/premium-oyster-sauce"
+      "notes": "官方每约15g：20kcal、蛋白0.2g、碳水4.7g、盐1.7g；换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。实际品牌与批次请核对。来源：https://uk.lkk.com/products/premium-oyster-sauce",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "reference-usda-19335",
@@ -239,7 +259,7 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "USDA SR28 NDB19335 Sugars, granulated每100g参考值；采用数据库能量387kcal，不强行改成碳水×4。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg19.pdf",
+      "notes": "USDA SR28 NDB19335 Sugars, granulated每100g参考值；采用数据库能量387kcal，不强行改成碳水×4。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg19.pdf 膳食纤维：白砂糖膳食纤维0g/100g。",
       "purchase": {
         "amount": 4,
         "quantity": 400,
@@ -248,7 +268,9 @@
         "density": null,
         "estimated": false,
         "note": ""
-      }
+      },
+      "fiber": 0,
+      "fiberSource": "USDA通用参考"
     },
     {
       "id": "reference-usda-04044",
@@ -264,7 +286,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "USDA SR28 NDB04044 soybean oil每100g参考；采用数据库能量884kcal，脂肪100g。烹饪实际用油需称量。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg04.pdf"
+      "notes": "USDA SR28 NDB04044 soybean oil每100g参考；采用数据库能量884kcal，脂肪100g。烹饪实际用油需称量。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg04.pdf 膳食纤维：大豆油膳食纤维0g/100g。",
+      "fiber": 0,
+      "fiberSource": "USDA通用参考"
     },
     {
       "id": "reference-lkk-seafood-soy",
@@ -280,7 +304,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "官方每约15g：19.5kcal、蛋白1.07g、碳水3.6g、盐2.4g，换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。并非用户实际瓶装标签。来源：https://uk.lkk.com/products/seasoned-soy-sauce-for-seafood"
+      "notes": "官方每约15g：19.5kcal、蛋白1.07g、碳水3.6g、盐2.4g，换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。并非用户实际瓶装标签。来源：https://uk.lkk.com/products/seasoned-soy-sauce-for-seafood",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "reference-usda-16108",
@@ -296,7 +322,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "USDA SR28 NDB16108每100g干成熟黄豆参考；用于按干豆投料核算，不能套用熟豆或兑水豆浆重量。碳水by difference含纤维。应充分煮熟。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg16.pdf"
+      "notes": "USDA SR28 NDB16108每100g干成熟黄豆参考；用于按干豆投料核算，不能套用熟豆或兑水豆浆重量。碳水by difference含纤维。应充分煮熟。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg16.pdf 膳食纤维：成熟干黄豆膳食纤维约9.3g/100g干重，非泡发或煮熟重量。",
+      "fiber": 9.3,
+      "fiberSource": "USDA通用参考"
     },
     {
       "id": "photo-20261111-junlebao-fermented-milk",
@@ -312,7 +340,9 @@
       "flavor": "",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户2026-11-11上传包装每100g录入：375kJ，蛋白质2.9g，脂肪3.3g（饱和脂肪2.3g），碳水12.0g（糖10.5g），钠60mg。能量由375kJ/4.184换算；属于含糖风味发酵乳。"
+      "notes": "按用户2026-11-11上传包装每100g录入：375kJ，蛋白质2.9g，脂肪3.3g（饱和脂肪2.3g），碳水12.0g（糖10.5g），钠60mg。能量由375kJ/4.184换算；属于含糖风味发酵乳。",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261111-cp-shuanrou",
@@ -328,7 +358,9 @@
       "flavor": "截图款（具体口味待确认）",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户2026-11-11提供的薄荷健康截图每100g可食部录入：70kcal（293kJ），蛋白质14.2g、脂肪0.6g、碳水1.6g、钠580mg。截图标题为正大食品/CP涮肉片，口味被截断；与其他藤椒鸡肉片可能为不同产品，避免合并。"
+      "notes": "按用户2026-11-11提供的薄荷健康截图每100g可食部录入：70kcal（293kJ），蛋白质14.2g、脂肪0.6g、碳水1.6g、钠580mg。截图标题为正大食品/CP涮肉片，口味被截断；与其他藤椒鸡肉片可能为不同产品，避免合并。",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "brand": "",
@@ -353,7 +385,9 @@
         "density": null,
         "estimated": false,
         "note": ""
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "brand": "",
@@ -378,7 +412,9 @@
         "density": null,
         "estimated": false,
         "note": "用户报价；2500g×95%=2375g可用鱼肉，仅用于费用换算"
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261112-spicy-chicken-meatballs",
@@ -394,7 +430,9 @@
       "flavor": "麻辣",
       "unitGrams": null,
       "price": null,
-      "notes": "按用户2026-11-12上传包装营养成分表每100g录入：501kJ（约119.7kcal）、蛋白质17.8g、脂肪2.7g、碳水5.8g、钠298mg。产品为鸡胸肉丸，具体单颗重量未知，按实际克重计算。"
+      "notes": "按用户2026-11-12上传包装营养成分表每100g录入：501kJ（约119.7kcal）、蛋白质17.8g、脂肪2.7g、碳水5.8g、钠298mg。产品为鸡胸肉丸，具体单颗重量未知，按实际克重计算。",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261112-spring-onion-ginger-cooking-wine",
@@ -421,7 +459,9 @@
         "density": 1,
         "estimated": true,
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261112-haitian-light-soy-sauce",
@@ -448,7 +488,9 @@
         "density": 1,
         "estimated": true,
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261112-haitian-oyster-sauce",
@@ -475,7 +517,9 @@
         "density": null,
         "estimated": false,
         "note": ""
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261112-jinlongyu-cooking-oil",
@@ -487,7 +531,7 @@
       "fat": 100,
       "carbs": 0,
       "sodium": 0,
-      "notes": "标签每100g：3700kJ、脂肪100g、蛋白质0g、碳水0g、钠0mg；饱和脂肪16g、多不饱和脂肪59g、单不饱和脂肪未从照片确认。正面油种未拍到，暂不推断。",
+      "notes": "标签每100g：3700kJ、脂肪100g、蛋白质0g、碳水0g、钠0mg；饱和脂肪16g、多不饱和脂肪59g、单不饱和脂肪未从照片确认。正面油种未拍到，暂不推断。 膳食纤维：纯食用油不含膳食纤维；该值非包装单列标示。",
       "flavor": "",
       "edibleRatio": 1,
       "nutritionBasis": "edible",
@@ -502,7 +546,9 @@
         "density": 1,
         "estimated": true,
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
-      }
+      },
+      "fiber": 0,
+      "fiberSource": "食物成分常识"
     },
     {
       "id": "photo-20261112-haitian-steamed-fish-soy-sauce",
@@ -529,7 +575,9 @@
         "density": 1,
         "estimated": true,
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261112-pitted-grey-dates",
@@ -547,7 +595,9 @@
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "weightMode": "包装产品净重"
+      "weightMode": "包装产品净重",
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "photo-20261113-tomato-noodle-seasoning",
@@ -573,7 +623,9 @@
         "density": null,
         "estimated": false,
         "note": "用户确认酸汤肥牛味、浓香番茄味同品牌同价：22元/450g。"
-      }
+      },
+      "fiber": null,
+      "fiberSource": "未标注/未知"
     },
     {
       "id": "reference-usda-11291",
@@ -590,7 +642,7 @@
       "unitGrams": null,
       "price": null,
       "barcode": "",
-      "notes": "USDA SR28 NDB11291，小葱/青葱（葱白和葱叶）生鲜可食部分通用参考，不适用于洋葱。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "notes": "USDA SR28 NDB11291，小葱/青葱（葱白和葱叶）生鲜可食部分通用参考，不适用于洋葱。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf 膳食纤维：生青葱膳食纤维约2.6g/100g。",
       "purchase": {
         "amount": 2,
         "quantity": 500,
@@ -599,7 +651,9 @@
         "density": null,
         "estimated": false,
         "note": "按用户提供的价格；按实际使用克数估算。"
-      }
+      },
+      "fiber": 2.6,
+      "fiberSource": "USDA通用参考"
     },
     {
       "id": "reference-usda-11216",
@@ -616,7 +670,7 @@
       "unitGrams": null,
       "price": null,
       "barcode": "",
-      "notes": "USDA SR28 NDB11216，生姜可食部分参考。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "notes": "USDA SR28 NDB11216，生姜可食部分参考。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf 膳食纤维：生姜膳食纤维约2.0g/100g。",
       "purchase": {
         "amount": 3,
         "quantity": 500,
@@ -625,7 +679,9 @@
         "density": null,
         "estimated": false,
         "note": "按用户提供的价格；按实际使用克数估算。"
-      }
+      },
+      "fiber": 2,
+      "fiberSource": "USDA通用参考"
     },
     {
       "id": "reference-usda-11819",
@@ -642,7 +698,7 @@
       "unitGrams": null,
       "price": null,
       "barcode": "",
-      "notes": "USDA SR28 NDB11819，鲜红辣椒可食部分参考，暂用于小米辣估算，非小米辣专属品种检测值。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf",
+      "notes": "USDA SR28 NDB11819，鲜红辣椒可食部分参考，暂用于小米辣估算，非小米辣专属品种检测值。 碳水为差减法，含膳食纤维。来源：https://www.ars.usda.gov/ARSUserFiles/80400535/Data/SR/SR28/reports/sr28fg11.pdf 膳食纤维：用鲜红辣椒约1.5g/100g作小米辣估算，非该品种实测。",
       "purchase": {
         "amount": 2,
         "quantity": 100,
@@ -651,7 +707,29 @@
         "density": null,
         "estimated": false,
         "note": "按用户提供的价格；按实际使用克数估算。"
-      }
+      },
+      "fiber": 1.5,
+      "fiberSource": "USDA红辣椒参考估算"
+    },
+    {
+      "id": "photo-20261115-psyllium-husk",
+      "name": "圆苞车前子壳（冲泡粉）",
+      "brand": "未确认",
+      "category": "其他",
+      "kcal": 178.05927342256214,
+      "protein": 1.2,
+      "fat": 0.6,
+      "carbs": 3.1,
+      "sodium": 56,
+      "fiber": 81.2,
+      "fiberSource": "包装标示",
+      "weightMode": "干粉重量（冲泡前）",
+      "flavor": "原味",
+      "edibleRatio": 1,
+      "nutritionBasis": "edible",
+      "unitGrams": null,
+      "price": null,
+      "notes": "用户2026-11-15商品截图：配料仅圆苞车前子壳，原料产地印度。每100g标示745kJ、蛋白质1.2g、脂肪0.6g、碳水3.1g、膳食纤维81.2g、钠56mg。按干粉称重；每5g约4.06g纤维。必须配足水冲服，不要干吞。截图为商品详情页，收到实物后可核对。"
     }
   ],
   "priceDefaults": [
