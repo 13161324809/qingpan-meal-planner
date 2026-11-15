@@ -730,6 +730,26 @@
       "unitGrams": null,
       "price": null,
       "notes": "用户2026-11-15商品截图：配料仅圆苞车前子壳，原料产地印度。每100g标示745kJ、蛋白质1.2g、脂肪0.6g、碳水3.1g、膳食纤维81.2g、钠56mg。按干粉称重；每5g约4.06g纤维。必须配足水冲服，不要干吞。截图为商品详情页，收到实物后可核对。"
+    },
+    {
+      "id": "photo-20261115-low-fat-sausage-original",
+      "name": "低脂轻肠（原味脆骨）",
+      "brand": "嗨食兽",
+      "category": "肉类",
+      "kcal": 110.42065009560228,
+      "protein": 16.4,
+      "fat": 2.6,
+      "carbs": 5.1,
+      "sodium": 522,
+      "fiber": null,
+      "fiberSource": "包装未标注",
+      "weightMode": "包装产品净重",
+      "flavor": "原味脆骨",
+      "edibleRatio": 1,
+      "nutritionBasis": "edible",
+      "unitGrams": 130,
+      "price": null,
+      "notes": "按用户2026-11-15商品详情截图录入：每100g能量462kJ、蛋白质16.4g、脂肪2.6g、碳水5.1g、钠522mg；每根130g。商品页面数据，实物标签请核对。膳食纤维未标注，保持未知；不将未知记为0。"
     }
   ],
   "priceDefaults": [
