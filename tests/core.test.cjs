@@ -102,6 +102,75 @@ const target = (over = {}) => ({
 const solve = (rs, t = target(), v = "A") =>
   C.solve(rs, t, ["午餐", "晚餐"], v, solver);
 
+test("膳食纤维按实际用量和配方汇总，未提供暂0不进入优化约束", () => {
+  const nuts=food("nuts",{fiber:8.2,fiberEstimated:false});
+  const missing=food("missing");
+  const rows=[row("nuts",nuts,{grams:25}),row("missing",missing,{grams:100})];
+  const fiber=C.fiberTotals(rows);
+  assert.ok(Math.abs(fiber.grams-2.05)<1e-9);
+  assert.equal(fiber.estimated,true);
+  assert.equal(C.fiberTotals([{...rows[1],grams:0}]).estimated,false);
+  const combo=C.compositeFood("fiber-recipe","配方",[{food:nuts,grams:20},{food:missing,grams:30}]);
+  assert.ok(Math.abs(combo.fiber-3.28)<1e-9);
+  assert.equal(combo.fiberEstimated,true);
+  assert.ok(Math.abs(C.fiberTotals([{food:combo,grams:100}]).grams-3.28)<1e-9);
+  assert.equal(solve([row("missing",missing)]).valid,true);
+  assert.throws(()=>C.validateFood({...nuts,fiber:-1}),/膳食纤维/);
+  assert.throws(()=>C.validateFood({...nuts,fiber:"8.2"}),/膳食纤维/);
+});
+
+test("旧配方用原料纤维默认值补齐，个人修改和已填零保留", () => {
+  const ingredient=food("nuts");
+  const recipe={...food("old-recipe"),isComposite:true,unitGrams:50,ingredients:[{food:ingredient,grams:50}]};
+  const foods=[ingredient,recipe];
+  C.fillFiberDefaults(foods,[{...ingredient,fiber:8.2,fiberEstimated:false}]);
+  assert.equal(ingredient.fiber,8.2);
+  assert.equal(recipe.fiber,8.2);
+  assert.equal(recipe.fiberEstimated,false);
+  ingredient.fiber=0;
+  C.fillFiberDefaults(foods,[{...ingredient,fiber:9}]);
+  assert.equal(ingredient.fiber,0);
+  const placeholder=food("fiber-upgrade",{fiber:0,fiberEstimated:true});
+  const oldRecipe={...food("old-fiber-recipe"),isComposite:true,unitGrams:100,fiber:0,fiberEstimated:true,ingredients:[{food:{...placeholder},grams:100}]};
+  const upgrade=[placeholder,oldRecipe];
+  C.fillFiberDefaults(upgrade,[{...placeholder,fiber:2.6,fiberEstimated:false}]);
+  assert.equal(placeholder.fiber,2.6);
+  assert.equal(oldRecipe.fiber,2.6);
+});
+
+test("体重7日均值按自然日窗口统计，缺失不补零，未来记录不进入过去统计", () => {
+  const weights = {
+    "2026-11-01":{kg:99}, "2026-11-02":{kg:72}, "2026-11-08":{kg:70},
+    "2026-11-09":{kg:70}, "2026-11-15":{kg:68}, "2026-11-16":{kg:1}
+  };
+  const stats = C.weightStats(weights, "2026-11-15");
+  assert.equal(stats.mean,69);
+  assert.equal(stats.priorMean,71);
+  assert.equal(stats.count,2);
+  assert.equal(stats.priorCount,2);
+  assert.equal(stats.change,-2);
+  assert.equal(stats.latest.date,"2026-11-15");
+  assert.equal(stats.trend.length,5);
+  assert.equal(C.weightStats({},"2026-11-15").mean,null);
+  assert.equal(C.weightStats({"2024-02-29":{kg:69}},"2024-03-01").count,1);
+  assert.equal(C.weightStats({"2024-02-29":{kg:69}},"2024-03-01").change,null);
+});
+
+test("体重备份校验真实日期和数值，兼容旧备份并完整往返", () => {
+  assert.equal(C.validRecordDate("2024-02-29"),true);
+  for(const date of ["2026-02-29","2026-02-30","2026-13-01","2026-1-1","__proto__"])
+    assert.equal(C.validRecordDate(date),false);
+  for(const record of [{kg:0},{kg:-1},{kg:"69"},{kg:Infinity},{kg:69,waist:-1},{kg:69,note:"a".repeat(301)}])
+    assert.throws(()=>C.validateWeightRecord("2026-11-15",record));
+  const state=C.initialState(); delete state.weights;
+  assert.doesNotThrow(()=>C.validateState(state));
+  state.weights={"2026-11-15":{kg:69,waist:87.5,note:"晨起"}};
+  const restored=C.validateState(JSON.parse(JSON.stringify(state)));
+  assert.deepEqual(restored.weights,state.weights);
+  assert.throws(()=>C.validateState({...state,weights:[]}));
+  assert.throws(()=>C.validateState({...state,weights:{"2026-02-30":{kg:69}}}));
+});
+
 test("价格按实际净重、枚数和显式密度换算，不影响营养，缺价不冒充完整总额", () => {
   const purchase = (amount,quantity,unit="g",yieldRatio=1,density=null) => ({amount,quantity,unit,yield:yieldRatio,density,estimated:false});
   const fish=food("fish",{purchase:purchase(79.9,2500,"g",.95)});

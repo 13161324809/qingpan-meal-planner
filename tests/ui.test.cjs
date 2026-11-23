@@ -14,12 +14,19 @@ const C = require("../core.js"),
   root = path.resolve(__dirname, "..");
 const options = { skip: !JSDOM };
 const tick = () => new Promise((r) => setTimeout(r, 10));
-function setup(initial, withBuiltin = false) {
+function setup(initial, withBuiltin = false, cloud = null, clock = null, file = null) {
   const dom = new JSDOM(
       fs.readFileSync(path.join(root, "index.html"), "utf8"),
       { url: "http://localhost/", runScripts: "outside-only" },
     ),
     w = dom.window;
+  if (clock) {
+    const NativeDate = w.Date;
+    w.Date = class extends NativeDate {
+      constructor(...args) { super(...(args.length ? args : [clock.now])); }
+      static now() { return clock.now; }
+    };
+  }
   w.HTMLDialogElement.prototype.showModal = function () {
     this.open = true;
   };
@@ -68,10 +75,22 @@ function setup(initial, withBuiltin = false) {
       "qingpan.v1",
       typeof initial === "string" ? initial : JSON.stringify(initial),
     );
+  if (cloud) {
+    w.localStorage.setItem("qingpan.githubConfig",JSON.stringify(cloud.config));
+    w.sessionStorage.setItem("qingpan.githubToken",cloud.token);
+    w.fetch = cloud.fetch;
+  }
+  if (file) {
+    if (file.mode) w.localStorage.setItem("qingpan.fileMode","1");
+    w.showSaveFilePicker = file.save;
+    w.showOpenFilePicker = file.open;
+  }
   for (const f of [
     "vendor/solver.js",
     "core.js",
     "solver-client.js",
+    "github-sync.js",
+    "local-file.js",
     ...(withBuiltin ? ["data/foods.js"] : []),
     "app.js",
   ])
@@ -688,7 +707,7 @@ test("DOM：已有吃鱼料汁按原料当前价格显示每份费用，整份�
   }finally{t.close();}
 });
 
-test("DOM：排序作用于配餐实际用量，未知末尾，克数变化重新排序且保留计算数据", options, async () => {
+test("DOM：排序作用于配餐实际用量，未知末尾，仅点击排序才重排且保留计算数据", options, async () => {
   const state=fixture(),base=state.foods[0];
   state.foods=[
     {...base,id:'sort-a',name:'甲',kcal:100,protein:80,fat:10,carbs:20,price:10},
@@ -704,22 +723,32 @@ test("DOM：排序作用于配餐实际用量，未知末尾，克数变化重�
     change(t,'[aria-label="甲克数"]','10');
     const plan=JSON.stringify(Object.values(t.state().days)[0].plan);
     change(t,'#meal-sort-field','kcal');
+    assert.equal(order(),'甲,乙,丙');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'乙,甲,丙');
     assert.match(t.all('.sort-value')[0].textContent,/20 kcal/);
     change(t,'#meal-sort-direction','asc');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'甲,乙,丙');
     change(t,'#meal-sort-field','price');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'乙,甲,丙');
     change(t,'#meal-sort-direction','desc');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'甲,乙,丙');
     change(t,'#meal-sort-field','protein');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'甲,乙,丙');
     change(t,'#meal-sort-field','fat');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'乙,甲,丙');
     change(t,'#meal-sort-field','carbs');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'乙,甲,丙');
     assert.equal(JSON.stringify(Object.values(t.state().days)[0].plan),plan);
     change(t,'[aria-label="甲克数"]','100');
+    assert.equal(order(),'乙,甲,丙');
+    click(t,'[data-action="sort-meal"]');
     assert.equal(order(),'甲,乙,丙');
     const restored=setup(t.state());
     try{assert.equal(restored.$('#meal-sort-field').value,'carbs'); assert.equal(restored.$('#meal-sort-direction').value,'desc');}
@@ -727,5 +756,269 @@ test("DOM：排序作用于配餐实际用量，未知末尾，克数变化重�
     await route(t,'foods');
     assert.equal(t.$('#meal-sort-field'),null);
     assert.equal(t.$('#food-sort-field'),null);
+  }finally{t.close();}
+});
+
+test("DOM：每日体重补记、更新、删除与备份恢复，保留饮食和营养目标", options, async () => {
+  const initial=fixture(); delete initial.weights;
+  const t=setup(initial);
+  try {
+    const before=t.state();
+    await route(t,'weights');
+    assert.ok(t.$('#weight-form'));
+    change(t,'#weight-date','2024-02-29');
+    let form=t.$('#weight-form');
+    form.elements.jin.value='138'; form.elements.waist.value='87.5'; form.elements.note.value='<img src=x onerror=alert(1)>';
+    submit(t,'#weight-form');
+    assert.equal(t.state().weights['2024-02-29'].kg,69);
+    assert.ok(t.$('.weight-stats').textContent.includes('138.00 斤'));
+    assert.ok(t.$('.weight-chart').textContent.includes('单位斤'));
+    assert.equal(t.state().weights['2024-02-29'].waist,87.5);
+    assert.equal(t.all('.weight-layout img').length,0);
+    assert.equal(t.all('.weight-chart circle').length,1);
+    assert.equal(t.$('.weight-chart').outerHTML.includes('NaN'),false);
+    assert.deepEqual(t.state().profiles,before.profiles);
+    form=t.$('#weight-form'); form.elements.jin.value='137.6';
+    submit(t,'#weight-form');
+    assert.equal(Object.keys(t.state().weights).length,1);
+    assert.equal(t.state().weights['2024-02-29'].kg,68.8);
+    click(t,'#backup-top');
+    const saved=t.downloads.at(-1);
+    assert.equal(JSON.parse(saved).weights['2024-02-29'].kg,68.8);
+    click(t,'[data-action="delete-weight"]');
+    assert.equal(Object.keys(t.state().weights).length,0);
+    Object.defineProperty(t.$('#import-file'),'files',{value:[{size:saved.length,text:async()=>saved}],configurable:true});
+    t.$('#import-file').dispatchEvent(new t.w.Event('change')); await tick();
+    assert.equal(t.state().weights['2024-02-29'].kg,68.8);
+    const refreshed=setup(t.state());
+    try { await route(refreshed,'weights'); change(refreshed,'#weight-date','2024-02-29'); assert.equal(refreshed.$('#weight-form').elements.jin.value,'137.6'); }
+    finally { refreshed.close(); }
+    assert.deepEqual(t.state().profiles,before.profiles);
+    assert.deepEqual(t.state().foods,before.foods);
+  } finally {t.close();}
+});
+
+test("DOM：纤维字段可编辑，配餐和组合套餐按用量汇总，备份保留缺失标记", options, async () => {
+  const t=setup(fixture());
+  try {
+    await route(t,'foods');
+    assert.ok(t.$('.library-table').textContent.includes('膳食纤维'));
+    click(t,'[data-action="edit-food"]');
+    const form=t.$('#food-form');
+    assert.equal(form.elements.fiber.value,'0');
+    assert.equal(form.elements.fiberEstimated.checked,true);
+    form.elements.fiber.value='5';
+    form.elements.fiber.dispatchEvent(new t.w.Event('input',{bubbles:true}));
+    assert.equal(form.elements.fiberEstimated.checked,false);
+    submit(t,'#food-form');
+    assert.equal(t.state().foods[0].fiber,5);
+    await route(t,'today');
+    click(t,'[data-action="add-food"]');
+    change(t,'[data-field="grams"]','50');
+    assert.match(t.$('.fiber-summary').textContent,/2.5g/);
+    click(t,'[data-action="new-combo"]');
+    t.$('#combo-form').elements.name.value='纤维组合';
+    t.$('.combo-ingredient input').value='40';
+    submit(t,'#combo-form');
+    const combo=t.state().foods.find(f=>f.isComposite);
+    assert.equal(combo.fiber,5);
+    click(t,'[data-action="add-food"][data-id="'+combo.id+'"]');
+    assert.match(t.$('.fiber-summary').textContent,/4.5g/);
+    click(t,'#backup-top');
+    const backup=JSON.parse(t.downloads.at(-1));
+    assert.equal(C.validateState(backup).foods[0].fiber,5);
+    assert.equal(backup.foods[0].fiberEstimated,false);
+  }finally{t.close();}
+});
+
+test("DOM：单项实际碳蛋脂热与费用随重量、求解和实际记录更新", options, async () => {
+  const initial=fixture(); initial.foods[0].price=2;
+  const t=setup(initial);
+  const value=key=>t.$('.row-nutrients [data-nutrient="'+key+'"] dd').textContent;
+  try{
+    click(t,'[data-action="add-food"]');
+    change(t,'[data-field="grams"]','125');
+    assert.equal(value('kcal'),'125 kcal');
+    assert.equal(value('protein'),'12.5g');
+    assert.equal(value('fat'),'2.5g');
+    assert.equal(value('carbs'),'12.5g');
+    assert.equal(value('cost'),'¥2.50');
+    click(t,'#solve');
+    for(let i=0;i<40 && t.$('#solve').disabled;i++) await tick();
+    assert.equal(t.$('#solve').disabled,false);
+    assert.equal(value('kcal'),'200 kcal');
+    assert.equal(value('protein'),'20g');
+    assert.equal(value('fat'),'4g');
+    assert.equal(value('carbs'),'20g');
+    assert.equal(value('cost'),'¥4.00');
+    click(t,'[data-action="copy-actual"]');
+    await route(t,'records');
+    change(t,'[data-field="grams"][data-actual="true"]','150');
+    assert.equal(value('kcal'),'150 kcal');
+    assert.equal(value('cost'),'¥3.00');
+    assert.equal(Object.values(t.state().days)[0].plan[0].grams,200);
+  }finally{t.close();}
+});
+
+test("DOM：GitHub模式加载全部云端数据、保存且不写本地个人数据，令牌不进入JSON", options, async () => {
+  const local=fixture(), remote=fixture(); remote.foods[0].name='云端食物'; C.fillFiberDefaults(remote.foods);
+  remote.weights={'2024-02-29':{kg:69,waist:87.5,note:'晨起'}};
+  let document=remote,sha='one',uploaded=null;
+  const config={owner:'example',repo:'private-data',branch:'main',path:'personal-data.json'};
+  const t=setup(local,false,{config,token:'test-session-token',fetch:async(url,options)=>{
+    if(options.method==='GET')return{ok:true,json:async()=>({sha,encoding:'base64',content:require('../github-sync.js').encode(JSON.stringify(document))})};
+    const body=JSON.parse(options.body); assert.equal(body.sha,sha); sha='two';
+    uploaded=JSON.parse(require('../github-sync.js').decode(body.content)); document=uploaded;
+    return{ok:true,json:async()=>({content:{sha}})};
+  }});
+  try{
+    const localBefore=t.w.localStorage.getItem('qingpan.v1');
+    assert.ok(t.$('#cloud-form')); assert.equal(t.$('[data-action="add-food"]'),null);
+    click(t,'[data-action="cloud-load"]'); await tick();
+    assert.ok(t.$('#picker').textContent.includes('云端食物'));
+    click(t,'[data-action="add-food"]');
+    assert.match(t.$('#cloud-status-text').textContent,/未保存/);
+    assert.equal(t.w.localStorage.getItem('qingpan.v1'),localBefore);
+    click(t,'[data-action="cloud-save"]'); await tick();
+    assert.equal(Object.values(uploaded.days)[0].plan.length,1);
+    assert.equal(uploaded.weights['2024-02-29'].kg,69);
+    assert.equal(JSON.stringify(uploaded).includes('test-session-token'),false);
+    assert.equal(t.w.localStorage.getItem('qingpan.v1'),localBefore);
+    assert.match(t.$('#cloud-status-text').textContent,/已同步/);
+  }finally{t.close();}
+});
+
+test("DOM：配置GitHub并首次迁移本机数据，连接信息与令牌不进入个人JSON", options, async () => {
+  const t=setup(fixture()); let uploaded;
+  t.w.fetch=async(url,options)=>options.method==='GET'?{ok:false,status:404}:{ok:true,json:async()=>{uploaded=JSON.parse(require('../github-sync.js').decode(JSON.parse(options.body).content));return{content:{sha:'first'}};}};
+  try{
+    await route(t,'settings');
+    const before=t.w.localStorage.getItem('qingpan.v1');
+    const form=t.$('#cloud-form');
+    for(const [k,v]of Object.entries({owner:'example',repo:'private-data',branch:'main',path:'personal-data.json',token:'test-session-token'}))form.elements[k].value=v;
+    submit(t,'#cloud-form');
+    assert.equal(t.$('[data-action="add-food"]'),null);
+    click(t,'[data-action="cloud-create"]'); await tick();
+    assert.equal(uploaded.foods[0].name,'数学测试食物');
+    assert.equal(JSON.stringify(uploaded).includes('test-session-token'),false);
+    assert.equal(t.w.localStorage.getItem('qingpan.v1'),before);
+    assert.equal(t.w.localStorage.getItem('qingpan.githubConfig').includes('test-session-token'),false);
+    assert.match(t.$('#cloud-status-text').textContent,/已同步/);
+  }finally{t.close();}
+});
+
+test("DOM：体重趋势点支持悬停、手机点击与键盘，提示日期和斤且不修改记录", options, async () => {
+  const state=fixture();state.weights={'2024-02-29':{kg:69},'2024-03-01':{kg:68.8}};
+  const t=setup(state);
+  try{
+    await route(t,'weights');change(t,'#weight-date','2024-03-01');
+    const before=JSON.stringify(t.state().weights);
+    const points=t.all('.weight-point'),tip=t.$('#weight-point-tooltip');
+    assert.equal(points.length,2);assert.equal(tip.hidden,true);
+    points[0].dispatchEvent(new t.w.Event('pointerover',{bubbles:true}));
+    assert.equal(tip.hidden,false);assert.match(tip.textContent,/2024-02-29/);assert.match(tip.textContent,/138.00 斤/);
+    points[0].dispatchEvent(new t.w.Event('pointerout',{bubbles:true}));
+    assert.equal(tip.hidden,true);
+    points[1].dispatchEvent(new t.w.MouseEvent('click',{bubbles:true}));
+    assert.match(tip.textContent,/2024-03-01/);assert.match(tip.textContent,/137.60 斤/);
+    points[1].dispatchEvent(new t.w.Event('pointerout',{bubbles:true}));assert.equal(tip.hidden,false);
+    points[1].dispatchEvent(new t.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(tip.hidden,true);
+    points[0].dispatchEvent(new t.w.FocusEvent('focusin',{bubbles:true}));assert.equal(tip.hidden,false);
+    points[0].dispatchEvent(new t.w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));assert.equal(tip.dataset.pinned,'true');
+    t.w.document.body.dispatchEvent(new t.w.MouseEvent('click',{bubbles:true}));assert.equal(tip.hidden,true);
+    assert.equal(JSON.stringify(t.state().weights),before);
+  }finally{t.close();}
+});
+
+test("DOM：跨天唤醒回到本地今天，昨日饮食保留，今日新记录刷新后仍存在", options, async () => {
+  const clock={now:new Date(2026,10,22,23,59).getTime()};
+  const t=setup(fixture(),false,null,clock);
+  try{
+    click(t,'[data-action="add-food"]');click(t,'[data-action="copy-actual"]');
+    assert.equal(t.state().days['2026-11-22'].actual.length,1);
+    assert.match(t.$('#toast').textContent,/已保存到本机：2026-11-22/);
+    clock.now=new Date(2026,10,23,0,1).getTime();
+    t.w.dispatchEvent(new t.w.Event('focus'));
+    assert.equal(t.$('#date').value,'2026-11-23');
+    assert.match(t.$('.diary-date-notice').textContent,/2026-11-23（今天）/);
+    assert.equal(t.all('.row-card').length,0);
+    click(t,'[data-action="add-food"]');change(t,'[data-field="grams"]','150');click(t,'[data-action="copy-actual"]');
+    assert.equal(t.state().days['2026-11-23'].actual[0].grams,150);
+    assert.equal(t.state().days['2026-11-22'].actual[0].grams,100);
+    const refreshed=setup(t.state(),false,null,clock);
+    try{await route(refreshed,'records');assert.equal(refreshed.$('#date').value,'2026-11-23');assert.equal(refreshed.$('[data-field="grams"]').value,'150');}
+    finally{refreshed.close();}
+  }finally{t.close();}
+});
+
+test("DOM：查看昨天后点今日导航不会沿用昨天，显式编辑历史仍可补记", options, async () => {
+  const clock={now:new Date(2026,10,23,12).getTime()},state=fixture();
+  const row={id:'old-plan',food:state.foods[0],meal:'全天',grams:75,min:0,max:500,step:5,fixed:false};
+  state.days['2026-11-22']={meals:['全天'],target:state.profiles[0],plan:[row],actual:[]};
+  const t=setup(state,false,null,clock);
+  try{
+    click(t,'[data-action="add-food"]');click(t,'[data-action="copy-actual"]');
+    await route(t,'records');change(t,'#date','2026-11-22');
+    assert.match(t.$('.diary-date-notice').textContent,/历史或指定日期/);
+    t.$('#nav a[href="#today"]').dispatchEvent(new t.w.MouseEvent('click',{bubbles:true,cancelable:true}));await tick();
+    for(let i=0;i<40 && t.$('#date').value!=='2026-11-23';i++) await tick();
+    assert.equal(t.$('#date').value,'2026-11-23');
+    await route(t,'records');change(t,'#date','2026-11-22');
+    click(t,'[data-action="go-today"]');await tick();
+    assert.equal(t.$('#date').value,'2026-11-22');
+    t.w.confirm=()=>false;click(t,'[data-action="copy-actual"]');
+    assert.equal(t.state().days['2026-11-22'].actual.length,0);
+    t.w.confirm=()=>true;click(t,'[data-action="copy-actual"]');
+    assert.equal(t.state().days['2026-11-22'].actual[0].grams,75);
+    click(t,'[data-action="diary-today"]');assert.equal(t.$('#date').value,'2026-11-23');
+    assert.equal(t.state().days['2026-11-23'].actual[0].grams,100);
+  }finally{t.close();}
+});
+
+test("DOM：保存失败不能提示成功，也不覆盖已有本地记录", options, async () => {
+  const t=setup(fixture());
+  try{
+    click(t,'[data-action="add-food"]');
+    const before=t.w.localStorage.getItem('qingpan.v1');
+    const original=t.w.Storage.prototype.setItem;
+    t.w.Storage.prototype.setItem=function(){throw Error('quota');};
+    click(t,'[data-action="copy-actual"]');
+    assert.match(t.$('#toast').textContent,/保存失败/);
+    assert.equal(t.w.localStorage.getItem('qingpan.v1'),before);
+    t.w.Storage.prototype.setItem=original;
+  }finally{t.close();}
+});
+
+test("DOM：绑定实际JSON后自动保存，清缓存后从同一文件恢复全部饮食", options, async () => {
+  let disk='';
+  const handle={name:'个人数据.json',getFile:async()=>{const snapshot=disk;return{text:async()=>snapshot};},createWritable:async()=>{let pending;return{write:async text=>{pending=text;},close:async()=>{disk=pending;},abort:async()=>{}};}};
+  const file={save:async()=>handle,open:async()=>[handle]};
+  const t=setup(fixture(),false,null,null,file);
+  try{
+    click(t,'[data-action="file-create"]');await tick();
+    assert.match(t.$('#file-status-text').textContent,/已保存到文件/);
+    t.w.localStorage.clear();
+    click(t,'[data-action="add-food"]');click(t,'[data-action="copy-actual"]');await tick();
+    const saved=JSON.parse(disk),day=Object.values(saved.days).find(d=>d.actual.length);
+    assert.equal(day.actual[0].grams,100);
+    assert.equal(t.w.localStorage.getItem('qingpan.v1'),null);
+    const reopened=setup(undefined,false,null,null,file);
+    try{click(reopened,'[data-action="file-open"]');await tick();await route(reopened,'records');assert.equal(reopened.$('[data-field="grams"]').value,'100');}
+    finally{reopened.close();}
+  }finally{t.close();}
+});
+
+test("DOM：文件模式刷新后需重新选文件，不显示旧缓存；失败时不能假报已保存", options, async () => {
+  let disk=JSON.stringify(fixture()),fail=false;
+  const handle={name:'data.json',getFile:async()=>({text:async()=>disk}),createWritable:async()=>{if(fail)throw Error('permission');let pending;return{write:async text=>pending=text,close:async()=>{disk=pending;},abort:async()=>{}};}};
+  const t=setup(fixture(),false,null,null,{mode:true,open:async()=>[handle],save:async()=>handle});
+  try{
+    assert.equal(t.$('#picker'),null);
+    click(t,'[data-action="file-open"]');await tick();
+    const before=disk;fail=true;
+    click(t,'[data-action="add-food"]');click(t,'[data-action="copy-actual"]');await tick();
+    assert.match(t.$('#file-status-text').textContent,/保存失败/);
+    assert.equal(disk,before);
+    assert.equal(t.all('.row-card').length,1);
   }finally{t.close();}
 });

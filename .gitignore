@@ -8,3 +8,5 @@ playwright-report/
 backups/
 .codex-remote-attachments/
 personal-data/
+personal-data.json
+轻盘个人数据*.json

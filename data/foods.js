@@ -30,7 +30,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": ""
       },
       "fiber": 1.5,
-      "fiberSource": "普通精制挂面参考估算（非本品实测；不溶性纤维参考范围0.9～1.6g/100g）"
+      "fiberSource": "普通精制挂面参考估算（非本品实测；不溶性纤维参考范围0.9～1.6g/100g）",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261111-whey",
@@ -56,8 +57,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": false,
         "note": ""
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261111-nuts",
@@ -84,7 +86,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": ""
       },
       "fiber": 8.2,
-      "fiberSource": "包装标示"
+      "fiberSource": "包装标示",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261111-meatballs",
@@ -101,8 +104,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "按用户截图4的自定义食物录入；肉种和品牌未提供，不作推断。称重口径暂记包装产品净重，若原记录另有口径请编辑核对。",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "用户上传的自定义食物截图标示每100g膳食纤维0g",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261111-fish",
@@ -119,8 +123,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "按用户截图5每100g可食部录入。重量按实际食用的肉重计算。",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "reference-usda-09040",
@@ -153,7 +158,8 @@ globalThis.QingpanBuiltinFoods = {
         ]
       },
       "fiber": 1.69,
-      "fiberSource": "USDA通用参考估算"
+      "fiberSource": "USDA通用参考估算",
+      "fiberEstimated": false
     },
     {
       "id": "reference-usda-01123",
@@ -181,7 +187,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": "按枚计价，每个可食50g用于个数换算"
       },
       "fiber": 0,
-      "fiberSource": "USDA通用参考"
+      "fiberSource": "USDA通用参考",
+      "fiberEstimated": false
     },
     {
       "id": "reference-usda-11116",
@@ -208,7 +215,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": ""
       },
       "fiber": 1,
-      "fiberSource": "USDA通用参考"
+      "fiberSource": "USDA通用参考",
+      "fiberEstimated": false
     },
     {
       "id": "reference-lkk-light-soy",
@@ -225,8 +233,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "官方每约5g：4.6kcal、蛋白0.39g、碳水0.7g、盐0.86g，按×20归一。钠=盐÷2.5；脂肪标为<0.1g/份，保留未知不当作0。非用户实际瓶装标签。来源：https://uk.lkk.com/products/premium-light-soy-sauce",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "reference-lkk-oyster",
@@ -243,8 +252,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "官方每约15g：20kcal、蛋白0.2g、碳水4.7g、盐1.7g；换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。实际品牌与批次请核对。来源：https://uk.lkk.com/products/premium-oyster-sauce",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "reference-usda-19335",
@@ -271,7 +281,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": ""
       },
       "fiber": 0,
-      "fiberSource": "USDA通用参考"
+      "fiberSource": "USDA通用参考",
+      "fiberEstimated": false
     },
     {
       "id": "reference-usda-04044",
@@ -289,7 +300,8 @@ globalThis.QingpanBuiltinFoods = {
       "price": null,
       "notes": "USDA SR28 NDB04044 soybean oil每100g参考；采用数据库能量884kcal，脂肪100g。烹饪实际用油需称量。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg04.pdf 膳食纤维：大豆油膳食纤维0g/100g。",
       "fiber": 0,
-      "fiberSource": "USDA通用参考"
+      "fiberSource": "USDA通用参考",
+      "fiberEstimated": false
     },
     {
       "id": "reference-lkk-seafood-soy",
@@ -306,8 +318,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "官方每约15g：19.5kcal、蛋白1.07g、碳水3.6g、盐2.4g，换算每100g。钠=盐÷2.5；脂肪<0.1g/份，未知，不当作0。并非用户实际瓶装标签。来源：https://uk.lkk.com/products/seasoned-soy-sauce-for-seafood",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "reference-usda-16108",
@@ -325,7 +338,8 @@ globalThis.QingpanBuiltinFoods = {
       "price": null,
       "notes": "USDA SR28 NDB16108每100g干成熟黄豆参考；用于按干豆投料核算，不能套用熟豆或兑水豆浆重量。碳水by difference含纤维。应充分煮熟。来源：https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/reports/sr28fg16.pdf 膳食纤维：成熟干黄豆膳食纤维约9.3g/100g干重，非泡发或煮熟重量。",
       "fiber": 9.3,
-      "fiberSource": "USDA通用参考"
+      "fiberSource": "USDA通用参考",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261111-junlebao-fermented-milk",
@@ -342,8 +356,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "按用户2026-11-11上传包装每100g录入：375kJ，蛋白质2.9g，脂肪3.3g（饱和脂肪2.3g），碳水12.0g（糖10.5g），钠60mg。能量由375kJ/4.184换算；属于含糖风味发酵乳。",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261111-cp-shuanrou",
@@ -360,8 +375,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "按用户2026-11-11提供的薄荷健康截图每100g可食部录入：70kcal（293kJ），蛋白质14.2g、脂肪0.6g、碳水1.6g、钠580mg。截图标题为正大食品/CP涮肉片，口味被截断；与其他藤椒鸡肉片可能为不同产品，避免合并。",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "brand": "",
@@ -387,8 +403,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": false,
         "note": ""
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "brand": "",
@@ -414,8 +431,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": false,
         "note": "用户报价；2500g×95%=2375g可用鱼肉，仅用于费用换算"
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261112-spicy-chicken-meatballs",
@@ -432,8 +450,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "notes": "按用户2026-11-12上传包装营养成分表每100g录入：501kJ（约119.7kcal）、蛋白质17.8g、脂肪2.7g、碳水5.8g、钠298mg。产品为鸡胸肉丸，具体单颗重量未知，按实际克重计算。",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261112-spring-onion-ginger-cooking-wine",
@@ -461,8 +480,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": true,
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261112-haitian-light-soy-sauce",
@@ -490,8 +510,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": true,
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261112-haitian-oyster-sauce",
@@ -519,8 +540,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": false,
         "note": ""
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261112-jinlongyu-cooking-oil",
@@ -549,7 +571,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
       },
       "fiber": 0,
-      "fiberSource": "食物成分常识"
+      "fiberSource": "食物成分常识",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261112-haitian-steamed-fish-soy-sauce",
@@ -577,8 +600,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": true,
         "note": "按用户要求，费用按1ml≈1g粗估；只用于费用，不改变营养。"
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "photo-20261112-pitted-grey-dates",
@@ -597,8 +621,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": null,
       "price": null,
       "weightMode": "包装产品净重",
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "用户上传的自定义食物截图标示每100g膳食纤维0g",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261113-tomato-noodle-seasoning",
@@ -625,8 +650,9 @@ globalThis.QingpanBuiltinFoods = {
         "estimated": false,
         "note": "用户确认酸汤肥牛味、浓香番茄味同品牌同价：22元/450g。"
       },
-      "fiber": null,
-      "fiberSource": "未标注/未知"
+      "fiber": 0,
+      "fiberSource": "未提供，按用户要求暂填0",
+      "fiberEstimated": true
     },
     {
       "id": "reference-usda-11291",
@@ -654,7 +680,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": "按用户提供的价格；按实际使用克数估算。"
       },
       "fiber": 2.6,
-      "fiberSource": "USDA通用参考"
+      "fiberSource": "USDA通用参考",
+      "fiberEstimated": false
     },
     {
       "id": "reference-usda-11216",
@@ -682,7 +709,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": "按用户提供的价格；按实际使用克数估算。"
       },
       "fiber": 2,
-      "fiberSource": "USDA通用参考"
+      "fiberSource": "USDA通用参考",
+      "fiberEstimated": false
     },
     {
       "id": "reference-usda-11819",
@@ -710,7 +738,8 @@ globalThis.QingpanBuiltinFoods = {
         "note": "按用户提供的价格；按实际使用克数估算。"
       },
       "fiber": 1.5,
-      "fiberSource": "USDA红辣椒参考估算"
+      "fiberSource": "USDA红辣椒参考估算",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261115-psyllium-husk",
@@ -730,7 +759,8 @@ globalThis.QingpanBuiltinFoods = {
       "nutritionBasis": "edible",
       "unitGrams": null,
       "price": null,
-      "notes": "用户2026-11-15商品截图：配料仅圆苞车前子壳，原料产地印度。每100g标示745kJ、蛋白质1.2g、脂肪0.6g、碳水3.1g、膳食纤维81.2g、钠56mg。按干粉称重；每5g约4.06g纤维。必须配足水冲服，不要干吞。截图为商品详情页，收到实物后可核对。"
+      "notes": "用户2026-11-15商品截图：配料仅圆苞车前子壳，原料产地印度。每100g标示745kJ、蛋白质1.2g、脂肪0.6g、碳水3.1g、膳食纤维81.2g、钠56mg。按干粉称重；每5g约4.06g纤维。必须配足水冲服，不要干吞。截图为商品详情页，收到实物后可核对。",
+      "fiberEstimated": false
     },
     {
       "id": "photo-20261115-low-fat-sausage-original",
@@ -742,15 +772,15 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 2.6,
       "carbs": 5.1,
       "sodium": 522,
-      "fiber": null,
-      "fiberSource": "包装未标注",
+      "fiber": 0,
+      "fiberSource": "包装未标注，按用户要求暂填0",
       "weightMode": "包装产品净重",
       "flavor": "原味脆骨",
       "edibleRatio": 1,
       "nutritionBasis": "edible",
       "unitGrams": 130,
       "price": 3.076923076923077,
-      "notes": "按用户2026-11-15商品详情截图录入：每100g能量462kJ、蛋白质16.4g、脂肪2.6g、碳水5.1g、钠522mg；每根130g。商品页面数据，实物标签请核对。膳食纤维未标注，保持未知；不将未知记为0。",
+      "notes": "按用户2026-11-15商品详情截图录入：每100g能量462kJ、蛋白质16.4g、脂肪2.6g、碳水5.1g、钠522mg；每根130g。商品页面数据，实物标签请核对。膳食纤维未标注，按用户要求暂填0，不代表实测为0。",
       "purchase": {
         "amount": 20,
         "quantity": 650,
@@ -759,7 +789,8 @@ globalThis.QingpanBuiltinFoods = {
         "density": null,
         "estimated": false,
         "note": "用户提供购买价：20元/650g，约5根×130g。"
-      }
+      },
+      "fiberEstimated": true
     }
   ],
   "priceDefaults": [

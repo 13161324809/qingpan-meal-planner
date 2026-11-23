@@ -8,6 +8,7 @@
     fat: "脂肪",
     carbs: "碳水",
     sodium: "钠",
+    fiber: "膳食纤维",
   };
   const clone = (x) => JSON.parse(JSON.stringify(x));
   const number = (x) => typeof x === "number" && Number.isFinite(x);
@@ -37,6 +38,9 @@
       notes: "营养由配方原料用量相加；默认一份整体固定，修改原料后需重新保存配方。"
     };
     for (const k of keys) food[k] = sum.unknown.includes(k) ? null : sum[k] * 100 / grams;
+    const fiber = fiberTotals(rows);
+    food.fiber = fiber.grams * 100 / grams;
+    food.fiberEstimated = fiber.estimated;
     return validateFood(food);
   }
   const counted = (f) => f.countMode === true || f.id === "reference-usda-01123";
@@ -58,6 +62,8 @@
     if (f.unitGrams !== null && (!number(f.unitGrams) || f.unitGrams <= 0))
       throw Error("每个重量必须大于0");
     if (f.price !== null && !nonneg(f.price)) throw Error("单价无效");
+    if (f.fiber !== undefined && f.fiber !== null && !nonneg(f.fiber)) throw Error("膳食纤维须为非负数");
+    if (f.fiberEstimated !== undefined && typeof f.fiberEstimated !== "boolean") throw Error("膳食纤维数据标记无效");
     if (f.purchase !== undefined && f.purchase !== null) {
       const p = f.purchase;
       if (!nonneg(p.amount) || !number(p.quantity) || p.quantity <= 0 ||
@@ -144,6 +150,7 @@
       const match = priceDefaults.find(p => p.id === food.id || p.names?.includes(food.name));
       if (match) food.purchase = clone(match.purchase);
     }
+    fillFiberDefaults(result.state.foods, pack.foods);
     result.state.builtinFoodsSeen = [
       ...new Set([...seen, ...pack.foods.map((f) => f.id)]),
     ];
@@ -164,6 +171,41 @@
       }
     }
     return out;
+  }
+  function fiberTotals(rows, foods = []) {
+    const library = new Map(foods.map(f => [f.id,f]));
+    function amount(food, grams, seen = new Set()) {
+      if (!grams) return {grams:0, estimated:false};
+      const current = library.get(food.id);
+      if (!food.isComposite && food.fiber === 0 && food.fiberEstimated === true && current && nonneg(current.fiber) && current.fiberEstimated !== true)
+        return {grams:current.fiber * grams / 100, estimated:false};
+      if (nonneg(food.fiber) && !(food.isComposite && food.fiberEstimated === true && Array.isArray(food.ingredients)))
+        return {grams:food.fiber * grams / 100, estimated:food.fiberEstimated === true};
+      if (food.isComposite && Array.isArray(food.ingredients) && food.unitGrams > 0 && !seen.has(food.id) && seen.size < 10) {
+        const next = new Set(seen); next.add(food.id);
+        return sum(food.ingredients.filter(r => r?.food && nonneg(r.grams)).map(r => amount(r.food, r.grams * grams / food.unitGrams, next)));
+      }
+      if (current && nonneg(current.fiber)) return {grams:current.fiber * grams / 100, estimated:current.fiberEstimated === true};
+      return {grams:0, estimated:true};
+    }
+    function sum(values) { return {grams:values.reduce((total,v) => total+v.grams,0), estimated:values.some(v => v.estimated)}; }
+    return sum(rows.map(r => amount(r.food, r.grams)));
+  }
+  function fillFiberDefaults(foods, defaults = []) {
+    const reference = new Map(defaults.map(f => [f.id,f]));
+    for (const food of foods.filter(f => !f.isComposite)) {
+      const known = reference.get(food.id);
+      const replacesPlaceholder = food.fiber === 0 && food.fiberEstimated === true && nonneg(known?.fiber) && known.fiberEstimated !== true;
+      if (food.fiber !== undefined && food.fiber !== null && !replacesPlaceholder) continue;
+      food.fiber = nonneg(known?.fiber) ? known.fiber : 0;
+      food.fiberEstimated = nonneg(known?.fiber) ? known.fiberEstimated === true : true;
+      food.fiberSource = known?.fiberSource || "未提供，按用户要求暂填0";
+    }
+    for (const food of foods.filter(f => f.isComposite)) {
+      if (food.fiber !== undefined && food.fiber !== null && food.fiberEstimated !== true) continue;
+      const value = fiberTotals([{food,grams:100}],foods);
+      food.fiber = value.grams; food.fiberEstimated = value.estimated;
+    }
   }
   function costs(rows, foods = []) {
     const library = new Map(foods.map(f => [f.id, f]));
@@ -524,6 +566,38 @@
     fatTolerance: 10,
     carbTolerance: 20,
   });
+  function validRecordDate(date) {
+    return typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      date >= "1900-01-01" && date <= "2200-12-31" &&
+      Number.isFinite(Date.parse(date + "T00:00:00Z")) &&
+      new Date(date + "T00:00:00Z").toISOString().slice(0,10) === date;
+  }
+  function validateWeightRecord(date, record) {
+    if (!validRecordDate(date)) throw Error("体重记录日期无效");
+    if (!record || !number(record.kg) || record.kg <= 0 || record.kg > 1000)
+      throw Error("体重请输入大于0且不超过1000的kg数值");
+    if (record.waist !== undefined && record.waist !== null && (!number(record.waist) || record.waist <= 0 || record.waist > 500))
+      throw Error("腰围请输入大于0且不超过500的cm数值，或留空");
+    if (record.note !== undefined && (typeof record.note !== "string" || record.note.length > 300))
+      throw Error("体重备注不能超过300字");
+    return record;
+  }
+  function weightStats(weights, date) {
+    if (!validRecordDate(date)) throw Error("体重统计日期无效");
+    const end = Date.parse(date + "T00:00:00Z");
+    const entries = Object.entries(weights || {}).filter(([d]) => d <= date).sort(([a],[b]) => a.localeCompare(b));
+    const window = (from, to) => entries.filter(([d]) => {
+      const day = Date.parse(d + "T00:00:00Z"); return day >= from && day <= to;
+    });
+    const current = window(end - 6 * 86400000, end);
+    const previous = window(end - 13 * 86400000, end - 7 * 86400000);
+    const average = rows => rows.length ? rows.reduce((sum,[,r]) => sum + r.kg, 0) / rows.length : null;
+    const mean = average(current), priorMean = average(previous);
+    return {mean, priorMean, count:current.length, priorCount:previous.length,
+      change:mean === null || priorMean === null ? null : mean - priorMean,
+      latest:entries.length ? {date:entries.at(-1)[0], ...entries.at(-1)[1]} : null,
+      trend:window(end - 29 * 86400000, end).map(([date,r]) => ({date,...r}))};
+  }
   const initialState = () => ({
     version: 1,
     foods: [],
@@ -533,6 +607,7 @@
     meals: ["全天"],
     templates: [],
     days: {},
+    weights: {},
   });
   function validateState(s) {
     if (
@@ -546,6 +621,11 @@
       Array.isArray(s.days)
     )
       throw Error("备份结构或版本不受支持");
+    if (s.weights !== undefined) {
+      if (!s.weights || typeof s.weights !== "object" || Array.isArray(s.weights) || Object.keys(s.weights).length > 10000)
+        throw Error("体重记录结构无效");
+      for (const [date, record] of Object.entries(s.weights)) validateWeightRecord(date, record);
+    }
     if (
       s.builtinFoodsSeen !== undefined &&
       (!Array.isArray(s.builtinFoodsSeen) ||
@@ -641,6 +721,8 @@
     portionStep,
     compositeFood,
     totals,
+    fiberTotals,
+    fillFiberDefaults,
     costs,
     targetBounds,
     validateRows,
@@ -651,6 +733,9 @@
     defaultTarget,
     initialState,
     validateState,
+    validRecordDate,
+    validateWeightRecord,
+    weightStats,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.MealCore = api;

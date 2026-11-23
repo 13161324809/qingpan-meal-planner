@@ -33,11 +33,11 @@ if errorlevel 1 (
 
 call "%~dp0pull-latest.cmd" --no-pause
 if errorlevel 1 goto failed
-node --test tests/core.test.cjs tests/catalog.test.cjs tests/solver-client.test.cjs tests/ui.test.cjs
+node --test tests/core.test.cjs tests/catalog.test.cjs tests/solver-client.test.cjs tests/github-sync.test.cjs tests/local-file.test.cjs tests/ui.test.cjs
 if errorlevel 1 goto failed
 
 rem Stage public project files only; exclude personal records and screenshots.
-git add -A -- .github .gitignore .nojekyll AGENTS.md CHANGELOG.md LICENSE README.md app.js build.cjs core.js index.html package.json server.cjs solver-client.js solver-worker-source.js styles.css worker.js data/foods.json data/foods.js "docs/*.md" tests vendor pull-latest.cmd push-changes.cmd
+git add -A -- .github .gitignore .nojekyll AGENTS.md CHANGELOG.md LICENSE README.md app.js github-sync.js local-file.js build.cjs core.js index.html package.json server.cjs solver-client.js solver-worker-source.js styles.css worker.js data/foods.json data/foods.js "docs/*.md" tests vendor pull-latest.cmd push-changes.cmd
 if errorlevel 1 goto failed
 git diff --cached --quiet
 if errorlevel 1 (

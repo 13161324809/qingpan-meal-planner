@@ -102,7 +102,9 @@
               type="number"
               min="0"
               step="any" /></label
-          ><label
+          ><label>膳食纤维 g<input name="fiber" type="number" min="0" step="any" value="0"></label>
+          <label><span>纤维数据未提供</span><input name="fiberEstimated" type="checkbox" checked>暂按0记录，之后可补全</label>
+          <label
             >钠 mg（选填，不是食盐）<input
               name="sodium"
               type="number"
@@ -200,6 +202,8 @@
     <script src="data/foods.js"></script>
     <script src="solver-worker-source.js"></script>
     <script src="solver-client.js"></script>
+    <script src="github-sync.js"></script>
+    <script src="local-file.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

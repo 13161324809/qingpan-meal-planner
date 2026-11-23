@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 22
       - run: node build.cjs
-      - run: node --test tests/core.test.cjs tests/catalog.test.cjs tests/solver-client.test.cjs
+      - run: node --test tests/core.test.cjs tests/catalog.test.cjs tests/solver-client.test.cjs tests/github-sync.test.cjs tests/local-file.test.cjs
       - run: node --check app.js
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm run test:ui

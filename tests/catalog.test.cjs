@@ -7,6 +7,15 @@ const catalog = JSON.parse(
   fs.readFileSync(require.resolve("../data/foods.json"), "utf8"),
 );
 
+test("既有图片核对的坚果纤维8.2与截图零值保留，未标示的暂0有标记", () => {
+  assert.equal(catalog.foods.find(f=>f.id==='photo-20261111-nuts').fiber,8.2);
+  assert.equal(catalog.foods.find(f=>f.id==='photo-20261111-meatballs').fiberEstimated,false);
+  assert.equal(catalog.foods.find(f=>f.id==='photo-20261112-pitted-grey-dates').fiberEstimated,false);
+  assert.ok(catalog.foods.every(f=>typeof f.fiber==='number' && f.fiber>=0));
+  assert.equal(catalog.foods.find(f=>f.id==='photo-20261111-whey').fiber,0);
+  assert.equal(catalog.foods.find(f=>f.id==='photo-20261111-whey').fiberEstimated,true);
+});
+
 test("香蕉按65%果肉折算为带皮称重，旧快照仍按原口径核算费用，鸡胸肉价格对应正确", () => {
   const update=catalog.foodUpdates.find(u=>u.id==='reference-usda-09040');
   const banana=catalog.foods.find(f=>f.id===update.id);

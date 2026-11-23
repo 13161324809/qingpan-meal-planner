@@ -567,6 +567,33 @@ main {
 .food-sort label { display: grid; gap: 5px; min-width: 120px; font-size: 12px; }
 .food-sort small { flex-basis: 100%; color: var(--muted); }
 .sort-value { color: var(--green); font-weight: 600; margin-top: 4px; }
+.weight-layout { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr); gap: 20px; align-items: start; }
+.weight-layout > *, .weight-layout > div { min-width: 0; }
+#weight-form { display: grid; gap: 16px; }
+.weight-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.weight-stats small { display: block; color: var(--muted); font-size: 12px; }
+.weight-stats strong { display: block; margin-top: 8px; font-size: 22px; color: var(--green); }
+.weight-chart { display: block; width: 100%; height: auto; }
+.weight-chart text { font-size: 12px; fill: #68775f; }
+.weight-chart-wrap { position: relative; }
+.weight-point { cursor: pointer; stroke: transparent; stroke-width: 22px; pointer-events: all; }
+.weight-point:hover, .weight-point:focus, .weight-point.is-active { fill: #294b24; stroke: rgb(82 118 75 / 18%); outline: none; }
+.weight-point-tooltip { position: absolute; z-index: 2; width: 150px; box-sizing: border-box; padding: 9px 12px; border-radius: 9px; background: #294b24; color: white; pointer-events: none; transform: translate(-50%, -100%); margin-top: -10px; box-shadow: 0 3px 12px #0002; }
+.weight-point-tooltip[hidden] { display: none; }
+.weight-point-tooltip[data-below="true"] { transform: translate(-50%, 0); margin-top: 10px; }
+.weight-point-tooltip strong, .weight-point-tooltip span { display: block; font-size: 13px; line-height: 1.5; }
+.fiber-summary { display: block; }
+.fiber-summary strong { display: block; margin-top: 6px; font-size: 14px; }
+.row-nutrients { display: flex; flex-wrap: wrap; gap: 7px 16px; margin: 10px 0; }
+.row-nutrients > div { min-width: 65px; }
+.row-nutrients dt { color: #68775f; font-size: 11px; }
+.row-nutrients dd { margin: 3px 0 0; color: #36552f; font-size: 13px; font-weight: 600; }
+.cloud-sync { display: block; overflow-wrap: anywhere; }
+.cloud-sync .actions { margin-top: 10px; }
+.file-storage { display: block; overflow-wrap: anywhere; }
+.file-storage .actions { margin-top: 10px; }
+#cloud-form { margin: 15px 0; }
+@media (max-width: 850px) { .weight-layout { grid-template-columns: minmax(0, 1fr); gap: 0; } }
 .row-weight > small { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
 @media (max-width: 600px) {
   .row-card.all-day:has(.count-controls) { grid-template-columns: minmax(0, 1fr) 30px; }

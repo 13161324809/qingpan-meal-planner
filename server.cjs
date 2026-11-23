@@ -9,6 +9,8 @@ const allowed = new Set([
   "index.html",
   "styles.css",
   "app.js",
+  "github-sync.js",
+  "local-file.js",
   "core.js",
   "worker.js",
   "solver-client.js",
