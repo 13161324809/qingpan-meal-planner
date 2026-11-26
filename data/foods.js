@@ -1350,7 +1350,16 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 120,
       "countMode": true,
       "price": null,
-      "notes": "用户2026-11-26实拍包装：每100g能量1745kJ、蛋白质6.8g、脂肪22.9g、碳水46.0g、钠2199mg。桶身正面可辨识净含量约120g（面饼+配料），若实物规格不同应修正。按120g/桶计算约500.5kcal、蛋白质8.16g、脂肪27.48g、碳水55.2g、钠2638.8mg。按整桶干品（含全部调料）计算；少放调料、剩汤时不能直接按比例精确扣减。膳食纤维和价格未提供。"
+      "notes": "用户2026-11-26实拍包装：每100g能量1745kJ、蛋白质6.8g、脂肪22.9g、碳水46.0g、钠2199mg。桶身正面可辨识净含量约120g（面饼+配料），若实物规格不同应修正。按120g/桶计算约500.5kcal、蛋白质8.16g、脂肪27.48g、碳水55.2g、钠2638.8mg。按整桶干品（含全部调料）计算；少放调料、剩汤时不能直接按比例精确扣减。膳食纤维和价格未提供。",
+      "purchase": {
+        "amount": 11,
+        "quantity": 360,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "三桶合计360g，11元；每桶120g，约3.67元"
+      }
     },
     {
       "id": "photo-20261126-yili-changqing-purple-rice-yogurt",
@@ -1370,7 +1379,16 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 250,
       "countMode": true,
       "price": null,
-      "notes": "用户2026-11-26实拍包装：每100g能量405kJ、蛋白质2.9g、脂肪3.4g、碳水13.5g、钠70mg、钙80mg。每瓶净含量250g，约242kcal、蛋白质7.25g、脂肪8.5g、碳水33.75g、钠175mg。价格与膳食纤维未提供。"
+      "notes": "用户2026-11-26实拍包装：每100g能量405kJ、蛋白质2.9g、脂肪3.4g、碳水13.5g、钠70mg、钙80mg。每瓶净含量250g，约242kcal、蛋白质7.25g、脂肪8.5g、碳水33.75g、钠175mg。价格与膳食纤维未提供。",
+      "purchase": {
+        "amount": 13,
+        "quantity": 500,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "500g共13元；每瓶250g，约6.50元"
+      }
     }
   ],
   "priceDefaults": [
