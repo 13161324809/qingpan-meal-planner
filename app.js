@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  // Keep the familiar double-click entry pointed at automatic disk storage.
+  // Explicit standalone mode remains available for offline static use.
+  if (location.protocol === "file:" && new URLSearchParams(location.search).get("standalone") !== "1") {
+    location.replace("http://127.0.0.1:4173/" + location.hash);
+    return;
+  }
   const C = MealCore,
     $ = (s) => document.querySelector(s),
     esc = (x) =>
@@ -22,8 +28,9 @@
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
   const KEY = "qingpan.v1",
-    categories = ["肉类", "鱼类", "主食", "蔬菜", "蛋奶", "饮品", "水果", "坚果", "调味品", "油脂", "其他"];
+    categories = ["肉类", "鱼类", "主食", "蔬菜", "蛋奶", "饮品", "水果", "坚果", "调味品", "油脂", "外卖", "其他"];
   const builtinFoods = globalThis.QingpanBuiltinFoods || null;
+  const localServer = globalThis.QingpanLocalServer === true;
   let cloudConfig = null, cloudToken = "", cloudStore = null, cloudConnected = false, cloudDirty = false, cloudWorking = false, cloudMessage = "";
   let fileMode = false, fileStore = null, fileDirty = false, fileBusy = 0, fileBinding = false, fileMessage = "";
   try {
@@ -32,6 +39,11 @@
     cloudToken = sessionStorage.getItem("qingpan.githubToken") || "";
     fileMode = !cloudConfig && localStorage.getItem("qingpan.fileMode") === "1";
   } catch { cloudMessage = "同步配置无法读取，可在个人设置重新填写。"; }
+  if (localServer) { cloudConfig=null; fileMode=true; }
+  if(localServer) {
+    const storageLabel=document.querySelector('.sidebar-bottom');
+    if(storageLabel) storageLabel.innerHTML='<span class="privacy-dot"></span> 个人数据自动保存到JSON文件<small>刷新自动读取 · 无需反复导入</small>';
+  }
   let state,
     storageError = "",
     rawBackup = "",
@@ -417,7 +429,7 @@
     return (
       heading(
         "真实记录，每一天。",
-        "计划与实际分开保存；历史营养数据保留当时的标签和目标。",
+        "今天配餐与实际饮食分开保存；历史营养数据保留当时的标签和目标。",
         `<input class="date-input" aria-label="记录日期" type="date" id="date" value="${date}">`,
       ) +
       `${diaryDateNotice()}<div class="day-list">${Object.keys(state.days)
@@ -431,7 +443,7 @@
         )
         .join(
           "",
-        )}</div><div class="layout"><section class="panel"><div class="panel-title"><h2>${esc(date)} · 实际吃了什么</h2><span class="badge">独立记录</span></div><div class="notice">当前计划 ${fmt(C.totals(d.plan).kcal)} kcal · 实际 ${fmt(C.totals(d.actual).kcal)} kcal。复制后可单独修改实际克数。</div>${d.actual.length ? rowsView(d.actual, true) : empty("还没有实际饮食记录", "把当日计划复制过来，再按真实食用量调整。")}${issuesBox(d.actual, d.target)}<div class="actions"><button class="primary" data-action="copy-actual">从当日计划复制</button><button data-action="go-today">编辑当日计划</button><button class="text-button" data-action="clear-actual">清空实际记录</button></div></section><aside class="sticky">${summary(d.actual, d.target)}</aside></div>`
+        )}</div><div class="layout"><section class="panel"><div class="panel-title"><h2>${esc(date)} · 实际吃了什么</h2><span class="badge">独立记录</span></div><div class="notice">今天配餐 ${fmt(C.totals(d.plan).kcal)} kcal · 实际 ${fmt(C.totals(d.actual).kcal)} kcal。实际克数可单独修改。</div>${d.actual.length ? rowsView(d.actual, true) : empty("还没有实际饮食记录", "在今天配餐页面点击“记为实际饮食”，再按真实食用量调整。")}${issuesBox(d.actual, d.target)}<div class="actions"><button data-action="go-today">编辑今天配餐</button><button class="text-button" data-action="clear-actual">清空实际记录</button></div></section><aside class="sticky">${summary(d.actual, d.target)}</aside></div>`
     );
   }
   function showWeightPoint(point, pinned = false) {
@@ -470,10 +482,12 @@
       `<div class="weight-layout"><section class="panel"><h2>每日记录</h2><form id="weight-form"><label>日期<input id="weight-date" name="date" type="date" required max="${localDate()}" value="${weightDate}"></label><label>体重 斤<input name="jin" aria-label="体重斤" type="number" min="0.02" max="2000" step="any" required value="${record ? record.kg * 2 : ''}" placeholder="例如138.0"></label><label>腰围 cm（选填）<input name="waist" type="number" min="0.01" max="500" step="any" value="${record?.waist ?? ''}"></label><label>备注（选填）<input name="note" maxlength="300" value="${esc(record?.note || '')}" placeholder="例如：晨起空腹"></label><p class="hint">建议在相近条件下称重，例如晨起、如厕后。同一天保存会更新原记录。</p><div class="actions"><button type="submit" class="primary">${record ? '保存修改' : '保存体重'}</button>${record ? `<button type="button" data-action="delete-weight" data-date="${weightDate}">删除此记录</button>` : ''}</div></form></section><div><section class="panel weight-stats"><div><small>最近记录${stats.latest ? ' · ' + esc(stats.latest.date) : ''}</small><strong>${stats.latest ? kg(stats.latest.kg) : '—'}</strong></div><div><small>所选日期近7天平均 · ${stats.count}次</small><strong>${kg(stats.mean)}</strong></div><div><small>较前7天均重 · 前期${stats.priorCount}次</small><strong>${stats.change === null ? '—' : (stats.change > 0 ? '+' : '') + (stats.change * 2).toFixed(2) + ' 斤'}</strong></div><div><small>所选日期热量目标</small><strong>${fmt(target.kcal)} kcal</strong></div></section><section class="panel"><h2>最近30天趋势</h2>${weightChart(stats.trend)}<p class="hint">均重按对应7个自然日内的已记录数据计算；缺失日期不当作0，两个时段都有记录才显示均重变化。</p></section></div></div><section class="panel"><h2>历史记录</h2><p class="hint">显示最近365条；其他日期可通过上方日期框查询、补记或修改。数据随完整JSON备份导出。</p>${history.length ? `<div class="table-scroll"><table><thead><tr><th>日期</th><th>体重 斤</th><th>腰围 cm</th><th>备注</th><th>操作</th></tr></thead><tbody>${history.map(([date,r]) => `<tr><td>${date}</td><td>${fmt(r.kg * 2)}</td><td>${r.waist ?? '—'}</td><td>${esc(r.note || '')}</td><td><button class="text-button" data-action="edit-weight" data-date="${date}">编辑</button><button class="text-button" data-action="delete-weight" data-date="${date}">删除</button></td></tr>`).join('')}</tbody></table></div>` : empty("还没有体重记录", "先保存第一条体重，也可以选择过去的日期补记。")}</section>`;
   }
   function filePanel() {
+    if (localServer) return `<section class="panel"><h2>固定JSON文件自动保存</h2><p>本地启动后自动读取，修改后自动写入同一个文件，不需要导入或选择文件。</p><p class="hint">默认路径：项目目录／personal-data／轻盘个人数据.json。旧版本自动保存在同目录的backups中。可用QINGPAN_DATA_FILE环境变量配置其他路径。</p><div class="actions"><button data-action="file-open" ${fileBinding || fileBusy ? 'disabled' : ''}>重新读取文件</button><button data-action="file-save" ${!fileStore || fileBusy ? 'disabled' : ''}>立即保存／重试</button><button data-action="export">导出备份</button></div></section>`;
     const supported = !!(window.showOpenFilePicker && window.showSaveFilePicker);
     return `<section class="panel"><h2>保存到实际JSON文件</h2><p class="hint">选择电脑上的JSON文件后，食物、套餐、每日饮食、体重和目标的修改会自动写入它。清浏览器缓存不会删除这个文件。再次打开网页时，需重新选择同一文件授权读取。</p>${supported ? '' : '<p class="notice warn">当前浏览器不支持直接读写文件。请用支持此功能的Chrome/Edge，并通过localhost或HTTPS打开；也可导出JSON或配置GitHub同步。</p>'}<div class="actions"><button data-action="file-create" ${!supported || fileBinding || fileBusy ? 'disabled' : ''}>新建JSON文件并迁入本页数据</button><button data-action="file-open" ${!supported || fileBinding || fileBusy ? 'disabled' : ''}>打开已有JSON文件继续使用</button><button data-action="file-save" ${!fileStore || fileBusy ? 'disabled' : ''}>立即保存／重试</button><button data-action="export">导出当前数据副本</button></div><p class="hint">建议文件放在文档或专门的数据目录，不要放浏览器缓存目录。普通本地文件不会自动在手机电脑间同步；多端仍可使用GitHub JSON。</p></section>`;
   }
   function fileStatus() {
+    if (localServer) return `<section class="notice file-storage" aria-live="polite"><strong id="file-status-text"></strong><div class="actions">${fileStore ? '<button data-action="file-save">立即保存／重试</button>' : '<button data-action="file-open">重试连接</button>'}<button data-action="export">导出备份</button></div></section>`;
     return `<section class="notice file-storage" aria-live="polite"><strong id="file-status-text"></strong><div class="actions"><button data-action="file-open">打开JSON文件</button><button data-action="file-create">新建JSON文件</button>${fileStore ? '<button data-action="file-save">立即保存／重试</button>' : ''}<button data-action="export">导出副本</button></div></section>`;
   }
   function updateFileStatus() {
@@ -493,6 +507,7 @@
     }).finally(() => { fileBusy--; updateFileStatus(); });
   }
   async function bindJsonFile(create) {
+    if (localServer) { await connectLocalServer(); return; }
     if (fileBinding || fileBusy || cloudWorking) { toast("请等待当前保存完成"); return; }
     if (!window.showSaveFilePicker || !window.showOpenFilePicker) { toast("当前浏览器不支持直接读写JSON文件，请使用Chrome/Edge或导出JSON"); return; }
     if (((fileStore && fileDirty) || cloudDirty) && !confirm("本页有未保存修改，建议先导出副本。仍要选择文件吗？")) return;
@@ -519,7 +534,30 @@
       if (error.name !== "AbortError") { fileMessage = "文件连接失败：" + error.message; toast(fileMessage); }
     } finally { fileBinding = false; updateFileStatus(); }
   }
+  async function connectLocalServer() {
+    if (fileBinding || fileBusy) return;
+    if (fileStore && fileDirty && !confirm("当前修改尚未保存，重新读取将替换本页数据。建议先导出备份，仍要读取吗？")) return;
+    fileBinding=true;fileMessage="正在读取固定JSON文件…";updateFileStatus();
+    try {
+      const store=new LocalJsonStorage.ServerStore(C.validateState);
+      let loaded;
+      try {loaded=await store.load();} catch(error) {
+        if(error.status!==404) throw error;
+        if(storageError) throw Error("浏览器旧数据无法读取，请先恢复有效备份，未创建数据文件");
+        loaded=C.clone(state);await store.create(loaded);
+      }
+      const before=JSON.stringify(loaded);
+      state=builtinFoods?C.installBuiltinFoods(loaded,builtinFoods).state:C.clone(loaded);
+      C.fillFiberDefaults(state.foods,builtinFoods?.foods||[]);
+      fileStore=store;fileDirty=false;storageError="";
+      fileMessage="全部数据已保存到文件："+store.handle.name;
+      invalidate();mealRowOrder.clear();editingTemplate=null;
+      if(JSON.stringify(state)!==before)queueFileSave();
+    } catch(error) {fileMessage="固定JSON文件连接失败："+error.message;toast(fileMessage);}
+    finally {fileBinding=false;render();}
+  }
   function cloudPanel() {
+    if(localServer) return "";
     const c = cloudConfig || {owner:"13161324809",repo:"qingpan-personal-data",branch:"main",path:"personal-data.json"};
     return `<section class="panel"><h2>GitHub个人JSON同步</h2><p class="hint">食物、价格、套餐、饮食记录、体重和目标共用一个JSON文件。建议使用独立私有仓库；公开仓库中的个人数据任何人都能读取。</p><form id="cloud-form" class="form-grid"><label>GitHub用户名<input name="owner" required value="${esc(c.owner)}"></label><label>数据仓库<input name="repo" required value="${esc(c.repo)}"></label><label>分支<input name="branch" required value="${esc(c.branch)}"></label><label>文件路径<input name="path" required value="${esc(c.path)}"></label><label>访问令牌<input name="token" type="password" autocomplete="off" placeholder="${cloudToken ? '本会话已有令牌，留空沿用' : '填写fine-grained token'}"></label><p class="hint">仓库需先创建并带初始提交。令牌仅限此数据仓库，Contents设为Read and write。令牌只保存在当前标签页会话，不进入备份、JSON文件或代码。</p><button type="submit">保存连接配置</button></form><div class="actions"><button data-action="cloud-load" ${!cloudConfig || cloudWorking ? 'disabled' : ''}>从GitHub加载</button><button data-action="cloud-create" ${!cloudConfig || cloudConnected || cloudWorking ? 'disabled' : ''}>首次上传本机数据</button><button data-action="export">导出当前数据备份</button></div><p class="hint">启用后，个人数据修改保留在页面内存中，点“保存到GitHub”才写入云端；不再写入浏览器个人数据存储。其他设备点“从GitHub加载”获取最新数据。原有本地数据暂保留作迁移备份。</p></section>`;
   }
@@ -577,9 +615,21 @@
     $("#app").innerHTML =
       (cloudConfig ? cloudStatus() : fileStatus()) + (storageError
         ? `<div class="notice error">${esc(storageError)} <button data-action="raw-export">导出原始数据</button></div>`
-        : "") + (cloudConfig && cloudWorking ? '<section class="panel">正在同步，请稍候。当前数据会保留到同步完成。</section>' : cloudConfig && !cloudConnected ? filePanel() + cloudPanel() : fileMode && !fileStore ? filePanel() + cloudPanel() : { today, foods, templates, records, weights, settings }[page]() + (page === "settings" ? filePanel() + cloudPanel() : ""));
+        : "") + (cloudConfig && cloudWorking ? '<section class="panel">正在同步，请稍候。当前数据会保留到同步完成。</section>' : cloudConfig && !cloudConnected ? storageConnectionPage(true) : fileMode && !fileStore ? storageConnectionPage(false) : { today, foods, templates, records, weights, settings }[page]() + (page === "settings" ? filePanel() + cloudPanel() : ""));
     updateCloudStatus();
     updateFileStatus();
+  }
+  function storageConnectionPage(cloud) {
+    const title = nav.find(n => n[0] === page)[2];
+    if (localServer) return heading(title,"正在连接本地固定数据文件，连接成功后自动显示此页面。") + filePanel();
+    return heading(title, cloud
+      ? "页面已切换。请先加载GitHub个人数据，再查看和编辑此页面。"
+      : "页面已切换。JSON文件尚未打开，请先连接数据文件，再查看和编辑此页面。") +
+      `<section class="notice warn" role="status">${cloud
+        ? "尚未加载云端数据，因此暂不展示浏览器旧备份。"
+        : "刷新或重新打开网页后，需要重新选择同一个JSON文件。文件中的数据不会因此删除。点击“打开已有JSON文件继续使用”，选择你保存的“轻盘个人数据”或“轻盘备份”；连接成功后会直接进入当前页面。"}</section>` +
+      (cloud ? cloudPanel() : filePanel()) +
+      (page === "settings" ? (cloud ? filePanel() : cloudPanel()) : "");
   }
   let comboDraft = [];
   function addComboIngredient(food, grams = 1) {
@@ -1374,7 +1424,7 @@
   window.addEventListener("beforeunload", (e) => {
     if ((cloudConfig && cloudConnected && cloudDirty) || (fileMode && fileStore && (fileDirty || fileBusy))) { e.preventDefault(); e.returnValue = ""; }
   });
-  if (builtinFoods && !storageError) {
+  if (builtinFoods && !storageError && !localServer) {
     try {
       const installed = C.installBuiltinFoods(state, builtinFoods);
       state = installed.state;
@@ -1383,10 +1433,11 @@
       toast("自带食物库加载失败：" + e.message);
     }
   }
-  if (!storageError) {
+  if (!storageError && !localServer) {
     const before = JSON.stringify(state.foods);
     C.fillFiberDefaults(state.foods,builtinFoods?.foods || []);
     if (before !== JSON.stringify(state.foods)) persist();
   }
   route();
+  if(localServer) connectLocalServer();
 })();

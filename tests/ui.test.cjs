@@ -81,6 +81,7 @@ function setup(initial, withBuiltin = false, cloud = null, clock = null, file = 
     w.fetch = cloud.fetch;
   }
   if (file) {
+    if(file.server) {w.QingpanLocalServer=true;w.fetch=file.fetch;}
     if (file.mode) w.localStorage.setItem("qingpan.fileMode","1");
     w.showSaveFilePicker = file.save;
     w.showOpenFilePicker = file.open;
@@ -1021,4 +1022,55 @@ test("DOM：文件模式刷新后需重新选文件，不显示旧缓存；失�
     assert.equal(disk,before);
     assert.equal(t.all('.row-card').length,1);
   }finally{t.close();}
+});
+
+test("DOM：文件未连接时导航明确显示目标页面，取消后可重试且连接后进入该页面", options, async () => {
+  const initial=fixture(), before=JSON.stringify(initial);
+  let cancel=true, disk=before;
+  const handle={name:'轻盘备份.json',getFile:async()=>({text:async()=>disk}),createWritable:async()=>{let pending;return{write:async text=>pending=text,close:async()=>{disk=pending;}};}};
+  const t=setup(initial,false,null,null,{mode:true,open:async()=>{if(cancel)throw new t.w.DOMException('取消','AbortError');return[handle];},save:async()=>handle});
+  try{
+    for(const [page,title] of [['settings','个人设置'],['templates','我的套餐'],['foods','食物库']]){
+      await route(t,page);
+      assert.equal(t.$('#app h1').textContent,title);
+      assert.match(t.$('#app').textContent,/JSON文件尚未打开/);
+      assert.equal(t.$('#picker'),null);
+    }
+    click(t,'[data-action="file-open"]');await tick();
+    assert.match(t.$('#app').textContent,/JSON文件尚未打开/);
+    assert.equal(t.w.localStorage.getItem('qingpan.v1'),before);
+    assert.equal(disk,before);
+    cancel=false;click(t,'[data-action="file-open"]');await tick();
+    assert.equal(t.w.location.hash,'#foods');
+    assert.doesNotMatch(t.$('#app').textContent,/JSON文件尚未打开/);
+    assert.match(t.$('#app').textContent,/数学测试食物/);
+    assert.match(t.$('#file-status-text').textContent,/已保存到文件/);
+  }finally{t.close();}
+});
+
+test("DOM：本地服务自动读取固定文件、自动保存，空浏览器重新打开也无需选文件", options, async () => {
+  const os=require('node:os'),{createServer}=require('../server.cjs');
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'qingpan-ui-')),dataFile=path.join(dir,'data.json');
+  const data=fixture();data.templates=[{id:'disk-template',name:'磁盘套餐',rows:[],meals:['全天'],target:data.profiles[0]}];
+  fs.writeFileSync(dataFile,JSON.stringify(data));
+  const server=createServer({dataFile});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const file={server:true,fetch:(url,options={})=>fetch(base+url,{...options,headers:{...options.headers,Origin:base}})};
+  let t;
+  try {
+    t=setup(undefined,false,null,null,file);
+    for(let i=0;i<30&&!t.$('#picker');i++)await tick();
+    assert.ok(t.$('#picker'));assert.equal(t.w.localStorage.getItem('qingpan.v1'),null);
+    click(t,'[data-action="add-food"]');click(t,'[data-action="copy-actual"]');
+    for(let i=0;i<30&&!Object.values(JSON.parse(fs.readFileSync(dataFile)).days).some(d=>d.actual.length);i++)await tick();
+    for(let i=0;i<30&&!t.$('#file-status-text').textContent.startsWith('全部数据已保存');i++)await tick();
+    assert.ok(Object.values(JSON.parse(fs.readFileSync(dataFile)).days).some(d=>d.actual[0]?.grams===100));
+    assert.equal(t.w.localStorage.getItem('qingpan.v1'),null);
+    t.close();t=setup(undefined,false,null,null,file);
+    for(let i=0;i<30&&!t.$('#picker');i++)await tick();
+    await route(t,'templates');assert.match(t.$('#app').textContent,/磁盘套餐/);
+    await route(t,'records');assert.equal(t.$('[data-field="grams"]').value,'100');
+    await route(t,'settings');assert.match(t.$('#app').textContent,/固定JSON文件自动保存/);
+    assert.equal(t.$('[data-action="file-create"]'),null);
+  } finally {t?.close();await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true});}
 });

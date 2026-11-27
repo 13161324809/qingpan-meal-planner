@@ -802,7 +802,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 7,
       "carbs": 12.25,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -810,7 +810,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约120kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪7g、碳水12.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约120kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪7g、碳水12.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-02",
@@ -822,7 +824,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 8,
       "carbs": 6.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -830,7 +832,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约150kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质13g、脂肪8g、碳水6.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约150kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质13g、脂肪8g、碳水6.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-03",
@@ -842,7 +846,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 7,
       "carbs": 3.75,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -850,7 +854,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约130kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质13g、脂肪7g、碳水3.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约130kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质13g、脂肪7g、碳水3.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-04",
@@ -862,7 +868,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 5,
       "carbs": 4.25,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -870,7 +876,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约110kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪5g、碳水4.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约110kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪5g、碳水4.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-05",
@@ -882,7 +890,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 12,
       "carbs": 4,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -890,7 +898,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约180kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质14g、脂肪12g、碳水4g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约180kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质14g、脂肪12g、碳水4g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-06",
@@ -902,7 +912,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 12,
       "carbs": 16,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -910,7 +920,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约220kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪12g、碳水16g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约220kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪12g、碳水16g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-07",
@@ -922,7 +934,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 7,
       "carbs": 6.25,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -930,7 +942,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质13g、脂肪7g、碳水6.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质13g、脂肪7g、碳水6.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-08",
@@ -942,7 +956,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 4,
       "carbs": 1.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -950,7 +964,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约130kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质22g、脂肪4g、碳水1.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约130kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质22g、脂肪4g、碳水1.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-09",
@@ -962,7 +978,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 6,
       "carbs": 4.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -970,7 +986,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约120kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约120kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-10",
@@ -982,7 +1000,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 8,
       "carbs": 7.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -990,7 +1008,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约130kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质7g、脂肪8g、碳水7.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约130kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质7g、脂肪8g、碳水7.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-11",
@@ -1002,7 +1022,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 9,
       "carbs": 5.75,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1010,7 +1030,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质9g、脂肪9g、碳水5.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质9g、脂肪9g、碳水5.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-12",
@@ -1022,7 +1044,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 6,
       "carbs": 4.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1030,7 +1052,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约80kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约80kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-13",
@@ -1042,7 +1066,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 10,
       "carbs": 7,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1050,7 +1074,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约150kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质8g、脂肪10g、碳水7g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约150kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质8g、脂肪10g、碳水7g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-14",
@@ -1062,7 +1088,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 9,
       "carbs": 5.75,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1070,7 +1096,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质9g、脂肪9g、碳水5.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质9g、脂肪9g、碳水5.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-15",
@@ -1082,7 +1110,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 4,
       "carbs": 4,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1090,7 +1118,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约100kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪4g、碳水4g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约100kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪4g、碳水4g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-16",
@@ -1102,7 +1132,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 5,
       "carbs": 4.25,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1110,7 +1140,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约70kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪5g、碳水4.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约70kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪5g、碳水4.25g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-17",
@@ -1122,7 +1154,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 6,
       "carbs": 4.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1130,7 +1162,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约120kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约120kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-18",
@@ -1142,7 +1176,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 10,
       "carbs": 2.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1150,7 +1184,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约160kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质15g、脂肪10g、碳水2.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约160kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质15g、脂肪10g、碳水2.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-19",
@@ -1162,7 +1198,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 7,
       "carbs": 4.75,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1170,7 +1206,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约90kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪7g、碳水4.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约90kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪7g、碳水4.75g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-20",
@@ -1182,7 +1220,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 12,
       "carbs": 11,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1190,7 +1228,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约200kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪12g、碳水11g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约200kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪12g、碳水11g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-21",
@@ -1202,7 +1242,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 12,
       "carbs": 3,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1210,7 +1250,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约180kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质15g、脂肪12g、碳水3g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约180kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质15g、脂肪12g、碳水3g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-22",
@@ -1222,7 +1264,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 8,
       "carbs": 8,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1230,7 +1272,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质9g、脂肪8g、碳水8g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约140kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质9g、脂肪8g、碳水8g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-23",
@@ -1242,7 +1286,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 10,
       "carbs": 0.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1250,7 +1294,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约180kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质22g、脂肪10g、碳水0.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约180kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质22g、脂肪10g、碳水0.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-24",
@@ -1262,7 +1308,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 4,
       "carbs": 5.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1270,7 +1316,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约70kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质3g、脂肪4g、碳水5.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约70kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质3g、脂肪4g、碳水5.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-25",
@@ -1282,7 +1330,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 14,
       "carbs": 4,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1290,7 +1338,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约190kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪14g、碳水4g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约190kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪14g、碳水4g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-26",
@@ -1302,7 +1352,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 6,
       "carbs": 4.5,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1310,7 +1360,9 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约80kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约80kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质2g、脂肪6g、碳水4.5g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
     },
     {
       "id": "meituan-takeout-20261125-27",
@@ -1322,7 +1374,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 10,
       "carbs": 8,
       "sodium": null,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "按份计；暂以100g作为1份的计算占位，实际重量待测",
       "flavor": "",
       "edibleRatio": 1,
@@ -1330,7 +1382,38 @@ globalThis.QingpanBuiltinFoods = {
       "unitGrams": 100,
       "countMode": true,
       "price": null,
-      "notes": "店长提供图片标注约170kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪10g、碳水8g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。"
+      "notes": "店长提供图片标注约170kcal/份，未提供份量重量、蛋白质、脂肪、碳水、钠及价格。蛋白质12g、脂肪10g、碳水8g均为按菜名和热量反推的粗略每份估算，不是检测值；不同油量、食材比例可能偏差很大。当前系统按每100g存营养，暂用100g=1份作为占位以实现按整数份选择；实际收到外卖称重后必须同时按实测份重重新换算每100g营养及unitGrams，否则按克计算会错误。图片第三排第5盒无名称未录入。",
+      "fiberEstimated": true,
+      "fiberSource": "未提供，按用户要求暂填0，不代表实测值"
+    },
+    {
+      "id": "photo-20261124-beef-rib-strips",
+      "name": "牛肋条（安格斯调理牛肉）",
+      "brand": "",
+      "category": "肉类",
+      "barcode": "",
+      "flavor": "",
+      "kcal": 141.96940726577438,
+      "protein": 19.7,
+      "fat": 7,
+      "carbs": 0,
+      "sodium": 205,
+      "weightMode": "生重（解冻后实际食用净重）",
+      "unitGrams": null,
+      "price": null,
+      "notes": "按用户2026-11-24包装截图录入：每100g能量594kJ、蛋白质19.7g、脂肪7.0g、碳水化合物0g、钠205mg。配料：安格斯牛肉、食用盐、复合调味料。速冻调制食品（生制品、非即食），称重口径按生重录入。生产商：阜阳市腾洋食品有限公司。采购价由用户提供：180元/4斤（2000g）。膳食纤维包装未标注，暂填0并标记未提供。",
+      "purchase": {
+        "amount": 180,
+        "quantity": 2000,
+        "unit": "g",
+        "yield": 1,
+        "density": null,
+        "estimated": false,
+        "note": "用户提供180元/4斤，按1斤=500g换算，折合9元/100g。"
+      },
+      "fiber": 0,
+      "fiberEstimated": true,
+      "fiberSource": "包装未标注，按既有约定暂填0"
     },
     {
       "id": "photo-20261126-uni-pickled-cabbage-beef-noodles",
@@ -1342,7 +1425,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 22.9,
       "carbs": 46,
       "sodium": 2199,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "干品净重（面饼及配料，冲泡前）",
       "flavor": "老坛酸菜牛肉",
       "edibleRatio": 1,
@@ -1359,7 +1442,9 @@ globalThis.QingpanBuiltinFoods = {
         "density": null,
         "estimated": false,
         "note": "三桶合计360g，11元；每桶120g，约3.67元"
-      }
+      },
+      "fiberEstimated": true,
+      "fiberSource": "包装未标注，按既有约定暂填0，不代表实测值"
     },
     {
       "id": "photo-20261126-yili-changqing-purple-rice-yogurt",
@@ -1371,7 +1456,7 @@ globalThis.QingpanBuiltinFoods = {
       "fat": 3.4,
       "carbs": 13.5,
       "sodium": 70,
-      "fiber": null,
+      "fiber": 0,
       "weightMode": "包装净重（含紫米爆珠）",
       "flavor": "蓝莓+紫米爆珠",
       "edibleRatio": 1,
@@ -1388,7 +1473,9 @@ globalThis.QingpanBuiltinFoods = {
         "density": null,
         "estimated": false,
         "note": "500g共13元；每瓶250g，约6.50元"
-      }
+      },
+      "fiberEstimated": true,
+      "fiberSource": "包装未标注，按既有约定暂填0，不代表实测值"
     }
   ],
   "priceDefaults": [

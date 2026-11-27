@@ -76,7 +76,16 @@ test("自带JSON与离线脚本一致，营养数据经过校验，缺失值保�
   const missing = catalog.foods.filter((f) =>
     C.keys.some((k) => f[k] === null),
   );
-  assert.equal(missing.length, 4);
+  assert.equal(missing.filter(f=>!f.id.startsWith('meituan-takeout-')).length, 4);
+  const takeout=catalog.foods.filter(f=>f.id.startsWith('meituan-takeout-'));
+  assert.equal(takeout.length,27);
+  for(const f of takeout) {
+    assert.equal(f.sodium,null);
+    assert.equal(f.fiber,0);
+    assert.equal(f.fiberEstimated,true);
+    assert.equal(f.countMode,true);
+    assert.match(f.notes,/估算/);
+  }
 });
 test("首次安装保留现有食物与记录；相同食物只添加一次", () => {
   const state = C.initialState();

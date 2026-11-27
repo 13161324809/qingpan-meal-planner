@@ -40,7 +40,24 @@
       return this.queue;
     }
   }
-  const api = {Store};
+  class ServerStore {
+    constructor(validate) { this.validate=validate; this.version=null; this.loaded=false; this.handle={name:"固定JSON文件"}; this.queue=Promise.resolve(); }
+    async request(method, body) {
+      const response=await root.fetch("/api/local-data",{method,cache:"no-store",headers:body?{"Content-Type":"application/json"}:{},...(body?{body:JSON.stringify(body)}:{})});
+      const result=await response.json();
+      if(!response.ok){const error=Error(result.error||"本地文件连接失败");error.status=response.status;throw error;}
+      this.handle.name=result.path;
+      return result;
+    }
+    async load() { const result=await this.request("GET");this.validate(result.data);this.version=result.version;this.loaded=true;return result.data; }
+    async create(data) { this.loaded=true;try { await this.save(data); } catch(error) {this.loaded=false;throw error;} }
+    save(data) {
+      this.validate(data); const snapshot=JSON.parse(JSON.stringify(data));
+      const write=async()=>{if(!this.loaded)throw Error("本地文件尚未加载");const result=await this.request("PUT",{data:snapshot,version:this.version});this.version=result.version;};
+      this.queue=this.queue.catch(()=>{}).then(write);return this.queue;
+    }
+  }
+  const api = {Store,ServerStore};
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.LocalJsonStorage = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);
